@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-28 16:43:41.007085",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "viewed_by",
+  "reference_document",
+  "reference_name",
+  "child_reference_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "viewed_by",
+   "fieldtype": "Data",
+   "label": "Viewed By"
+  },
+  {
+   "fieldname": "reference_document",
+   "fieldtype": "Link",
+   "label": "Reference Document",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference name",
+   "options": "reference_document"
+  },
+  {
+   "fieldname": "child_reference_name",
+   "fieldtype": "Data",
+   "label": "Child Reference name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-29 21:39:11.533151",
+ "modified_by": "Administrator",
+ "module": "File Sharing",
+ "name": "Drawing View Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

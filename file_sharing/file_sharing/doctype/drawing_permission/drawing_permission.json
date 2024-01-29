@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-22 14:11:10.873709",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "status",
+  "column_break_snvxm",
+  "attached_to_doctype",
+  "attached_to_name",
+  "amended_from",
+  "section_break_rpgn",
+  "files"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nDraft\nShared\nExpired\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_snvxm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Supplier",
+   "depends_on": "eval:doc.files.length > 0",
+   "fieldname": "attached_to_doctype",
+   "fieldtype": "Link",
+   "label": "Attached To DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.files.length > 0",
+   "fieldname": "attached_to_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Supplier Name",
+   "options": "attached_to_doctype"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Drawing Permission",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_rpgn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.item_code",
+   "fieldname": "files",
+   "fieldtype": "Table",
+   "label": "Files",
+   "options": "Drawing Permission Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-01-29 21:38:54.753407",
+ "modified_by": "Administrator",
+ "module": "File Sharing",
+ "name": "Drawing Permission",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Draft"
+  },
+  {
+   "color": "Cyan",
+   "title": "Ready to Share"
+  },
+  {
+   "color": "Gray",
+   "title": "Time-Limited Shared"
+  },
+  {
+   "color": "Green",
+   "title": "Shared"
+  },
+  {
+   "color": "Orange",
+   "title": "Expired"
+  },
+  {
+   "color": "Yellow",
+   "title": "Archived"
+  }
+ ]
+}

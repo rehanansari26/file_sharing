@@ -1,0 +1,146 @@
+{% extends "templates/web.html" %}
+
+{% block title %} PDF Viewer with Watermark and 3D Model Viewer {% endblock %}
+
+{% block page_content %}
+{% if frappe.session.user == 'Guest' %}
+    {{ frappe.throw(_("Log in to access this page."), frappe.PermissionError) }}
+{% else %}
+{% endif %}
+{% endblock %}
+
+{% block style %}
+<style>
+  #page-enggdesign {
+    display: none;
+  }
+  .page_content, .web-footer {
+      display: none;
+  }
+
+  canvas, model-viewer {
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+  }
+
+  .expired-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: red;
+  }
+
+  @media print {
+      .no-print {
+          display: none;
+      }
+  }
+</style>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<script type="module">
+  const drawingStatus = "{{ drawing_details[3] }}";
+  const filePath = "{{ drawing_details[0] }}";
+  
+  if (drawingStatus !== 'Expired') {
+    if (filePath.endsWith('.pdf')) {
+      renderPDF(filePath);
+    } else if (filePath.endsWith('.glb')) {
+      renderModel(filePath);
+    }
+  } else {
+    document.body.appendChild(Object.assign(document.createElement('div'), {
+      textContent: 'Expired',
+      className: 'expired-label'
+    }));
+  }
+
+  function renderPDF(pdfPath) {
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.worker.min.js';
+
+    function createCanvas(pageNumber) {
+      const canvas = document.createElement('canvas');
+      canvas.id = `the-canvas-${pageNumber}`;
+      canvas.addEventListener('contextmenu', event => {
+        event.preventDefault();
+        alert('Right-click is disabled on this canvas.');
+      });
+      document.body.appendChild(canvas);
+      return canvas;
+    }
+
+    function renderPage(page, pageNumber) {
+      const scale = 1.5;
+      const viewport = page.getViewport({ scale });
+      const canvas = createCanvas(pageNumber);
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      return page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise.then(() => {
+        addWatermark(canvas);
+      });
+    }
+
+    function addWatermark(canvas) {
+      const context = canvas.getContext('2d');
+      context.font = '20px Arial';
+      context.fillStyle = 'rgba(100, 100, 100, 0.5)';
+      context.textAlign = 'left';
+      context.textBaseline = 'top';
+      const watermarkText = "{{ supplier_name }}";
+      const spacing = 350;
+
+      for (let x = 0; x < canvas.width; x += spacing) {
+        for (let y = 0; y < canvas.height; y += spacing) {
+          context.save();
+          context.translate(x, y);
+          context.rotate(-45 * Math.PI / 180);
+          context.fillText(watermarkText, 0, 0);
+          context.restore();
+        }
+      }
+    }
+
+    pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
+      [...Array(pdf.numPages).keys()].forEach(pageNum =>
+        pdf.getPage(pageNum + 1).then(page => renderPage(page, pageNum + 1))
+      );
+    }).catch(reason => console.error(reason));
+  }
+
+  function renderModel(modelPath) {
+    const modelViewerContainer = document.createElement('div');
+    modelViewerContainer.style.display = 'flex';
+    modelViewerContainer.style.justifyContent = 'center';
+    modelViewerContainer.style.alignItems = 'center';
+    modelViewerContainer.style.height = '100vh';
+
+    const modelViewer = document.createElement('model-viewer');
+    modelViewer.alt = "3D Model";
+    modelViewer.src = modelPath;
+    modelViewer.shadowIntensity = "1";
+    modelViewer.cameraControls = true;
+    modelViewer.touchAction = "pan-y";
+    modelViewer.style.height = "80vh";
+
+    modelViewerContainer.appendChild(modelViewer);
+    document.body.appendChild(modelViewerContainer);
+  }
+  
+  let currentUrl = window.location.href;
+  let urlParams = new URLSearchParams(new URL(currentUrl).search);
+  let value = urlParams.get('query');
+  frappe.call({
+    method: "design.design_management.doctype.drawing_permission.drawing_permission.log_view_if_not_expired",
+    args: {
+      "reference_name": value
+    }
+  })
+</script>
+{% endblock %}

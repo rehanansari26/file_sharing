@@ -133,23 +133,23 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"file_sharing.tasks.all"
-# 	],
-# 	"daily": [
-# 		"file_sharing.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"file_sharing.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"file_sharing.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"file_sharing.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	# "all": [
+	# 	"file_sharing.tasks.all"
+	# ],
+	"daily": [
+		"file_sharing.file_sharing.doctype.drawing_permission.drawing_permission.auto_expired"
+	],
+	# "hourly": [
+	# 	"file_sharing.tasks.hourly"
+	# ],
+	# "weekly": [
+	# 	"file_sharing.tasks.weekly"
+	# ],
+	# "monthly": [
+	# 	"file_sharing.tasks.monthly"
+	# ],
+}
 
 # Testing
 # -------
