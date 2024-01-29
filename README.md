@@ -4,6 +4,16 @@
 
 File Sharing System
 
+## Features
+
+- **File Support:**
+  - Documents: Supports PDF files for document sharing.
+  - 3D Models: Utilizes the model viewer library to display .glb files, enhancing the visualization of 3D models.
+ 
+**Dependencies:**
+   - [Frappe Framework](https://github.com/frappe/frappe)
+   - [ERPNext App](https://github.com/frappe/erpnext)
+
 #### License
 
 mit
