@@ -13,6 +13,8 @@
   "column_break_snvxm",
   "attached_to_doctype",
   "attached_to_name",
+  "email_id",
+  "send_email",
   "amended_from",
   "section_break_rpgn",
   "files"
@@ -81,12 +83,26 @@
    "fieldtype": "Table",
    "label": "Files",
    "options": "Drawing Permission Item"
+  },
+  {
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email Id",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "email_id",
+   "fieldname": "send_email",
+   "fieldtype": "Check",
+   "label": "Send Email"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-29 21:38:54.753407",
+ "modified": "2024-01-30 11:37:20.015443",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "Drawing Permission",
