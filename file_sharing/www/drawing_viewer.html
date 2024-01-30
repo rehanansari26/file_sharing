@@ -1,0 +1,154 @@
+{% extends "templates/web.html" %}
+
+{% block title %}
+Drawing Viewer
+{% endblock %}
+
+{% block page_content %}
+{% if frappe.session.user == 'Guest' %}
+    {{ frappe.throw(_("Log in to access this page."), frappe.PermissionError) }}
+{% else %}
+    <div id="pdfContainer" class="canvascontainer"></div>
+{% endif %}
+{% endblock %}
+
+{% block style %}
+<style>
+    .canvascontainer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #pdfCanvas {
+        max-width: 100%;
+        max-height: 100vh;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+    .expired-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        color: red;
+    }
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .printable-content {
+            visibility: visible;
+        }
+        .no-print, .non-printable {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<script type="module">
+    const filePath = "{{ file_url }}";
+    const drawingStatus = "{{ child_status }}";
+    const supplierName = "{{ supplier_name }}"
+    const allowDownload = parseInt("{{ allow_download }}", 10);
+    
+    if (drawingStatus !== 'Expired') {
+        if (filePath.endsWith('.pdf')) {
+            renderPDFDocument();
+        } else if (filePath.endsWith('.glb')) {
+            renderModel(filePath);
+        }
+    } else {
+        showExpiredLabel();
+    }
+
+    function renderModel(modelPath) {
+        const modelViewerContainer = document.createElement('div');
+        modelViewerContainer.style.display = 'flex';
+        modelViewerContainer.style.justifyContent = 'center';
+        modelViewerContainer.style.alignItems = 'center';
+        modelViewerContainer.style.height = '100vh';
+
+        const modelViewer = document.createElement('model-viewer');
+        modelViewer.alt = "3D Model";
+        modelViewer.src = modelPath;
+        modelViewer.shadowIntensity = "1";
+        modelViewer.cameraControls = true;
+        modelViewer.touchAction = "pan-y";
+        modelViewer.style.height = "80vh";
+
+        modelViewerContainer.appendChild(modelViewer);
+        document.body.appendChild(modelViewerContainer);
+    }
+
+    function renderPDFDocument() {
+      frappe.call({
+          method: "file_sharing.file_sharing.doctype.drawing_permission.drawing_permission.get_watermarked_pdf",
+          args: {
+            file_url: filePath,
+            supplier_name: supplierName
+          },
+          callback: function(response) {
+              if (response.message) {
+                  var byteArray = new Uint8Array(response.message);
+                  renderPDF(byteArray);
+              } else {
+                  console.error('No message in the response:', response);
+              }
+          }
+      });
+    }
+
+    function renderPDF(pdfData) {
+      var loadingTask = pdfjsLib.getDocument({data: pdfData});
+      loadingTask.promise.then(function(pdf) {
+          console.log('PDF loaded');
+          var pdfContainer = document.getElementById('pdfContainer');
+          pdfContainer.style.display = 'block';
+          pdfContainer.style.paddingBottom = '20px';
+
+          for(let pageNum = 1; pageNum <= pdf.numPages; pageNum++){
+              pdf.getPage(pageNum).then(function(page) {
+                  console.log('Page ' + pageNum + ' loaded');
+
+                  var canvas = document.createElement("canvas");
+                  var ctx = canvas.getContext('2d');
+
+                  canvas.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.5)";
+                  canvas.style.marginBottom = "20px";
+                  canvas.style.display = 'block';
+
+                  pdfContainer.appendChild(canvas);
+
+                  var viewport = page.getViewport({scale: 1.0});
+                  canvas.height = viewport.height;
+                  canvas.width = viewport.width;
+
+                  var renderContext = {
+                      canvasContext: ctx,
+                      viewport: viewport
+                  };
+
+                  var renderTask = page.render(renderContext);
+                  renderTask.promise.then(function() {
+                      console.log('Page ' + pageNum + ' rendered');
+                  });
+              });
+          }
+      }, function(error) {
+          console.error('Error loading PDF: ', error);
+      });
+    }
+
+    function showExpiredLabel() {
+      document.body.appendChild(Object.assign(document.createElement('div'), {
+        textContent: 'Expired',
+        className: 'expired-label'
+      }));
+    }
+</script>
+
+{% endblock %}
