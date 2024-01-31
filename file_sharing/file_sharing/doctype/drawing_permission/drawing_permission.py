@@ -153,49 +153,49 @@ def check_duplicate_shared_files(self):
 
 @frappe.whitelist()	
 def get_watermarked_pdf(file_url, supplier_name, is_private):
-	status = 'private' if is_private == 1 else 'public'
-    input_pdf = PdfReader(frappe.get_site_path(status, 'files', file_url.split('/')[-1]))
-    watermark_text = supplier_name
-    watermark_opacity = 0.3
-    watermark_angle = 45
-    watermark_font_size = 18
-    text_width = 100
-    text_height = 100
-
-    watermark = BytesIO()
-    c = canvas.Canvas(watermark)
-
-    page_width = input_pdf.pages[0].mediabox[2]
-    page_height = input_pdf.pages[0].mediabox[3]
-    diagonal = int(math.sqrt(page_width ** 2 + page_height ** 2))
-    x_offset = -diagonal
-    while x_offset < diagonal:
-        y_offset = -diagonal
-        while y_offset < diagonal:
-            c.saveState()
-            c.translate(x_offset, y_offset)
-            c.rotate(watermark_angle)
-            c.setFillColorRGB(0, 0, 0, watermark_opacity)
-            c.setFont("Helvetica", watermark_font_size)
-            c.drawString(0, 0, watermark_text)
-            c.restoreState()
-            y_offset += text_height
-        x_offset += text_width
-
-    c.save()
-    watermark.seek(0)
-
-    output_pdf = PdfWriter()
-
-    for i in range(len(input_pdf.pages)):
-        page = input_pdf.pages[i]
-        watermark_reader = PdfReader(watermark)
-        watermark_page = watermark_reader.pages[0]
-        page.merge_page(watermark_page)
-        output_pdf.add_page(page)
-
-    pdf_bytes = BytesIO()
-    output_pdf.write(pdf_bytes)
-    pdf_bytes.seek(0)
-
-    return pdf_bytes.getvalue()
+	status = 'private' if int(is_private) == 1 else 'public'
+	input_pdf = PdfReader(frappe.get_site_path(status, 'files', file_url.split('/')[-1]))
+	watermark_text = supplier_name
+	watermark_opacity = 0.3
+	watermark_angle = 45
+	watermark_font_size = 18
+	text_width = 100
+	text_height = 100
+	
+	watermark = BytesIO()
+	c = canvas.Canvas(watermark)
+	
+	page_width = input_pdf.pages[0].mediabox[2]
+	page_height = input_pdf.pages[0].mediabox[3]
+	diagonal = int(math.sqrt(page_width ** 2 + page_height ** 2))
+	x_offset = -diagonal
+	while x_offset < diagonal:
+		y_offset = -diagonal
+		while y_offset < diagonal:
+			c.saveState()
+			c.translate(x_offset, y_offset)
+			c.rotate(watermark_angle)
+			c.setFillColorRGB(0, 0, 0, watermark_opacity)
+			c.setFont("Helvetica", watermark_font_size)
+			c.drawString(0, 0, watermark_text)
+			c.restoreState()
+			y_offset += text_height
+		x_offset += text_width
+		
+	c.save()
+	watermark.seek(0)
+	
+	output_pdf = PdfWriter()
+	
+	for i in range(len(input_pdf.pages)):
+		page = input_pdf.pages[i]
+		watermark_reader = PdfReader(watermark)
+		watermark_page = watermark_reader.pages[0]
+		page.merge_page(watermark_page)
+		output_pdf.add_page(page)\
+	
+	pdf_bytes = BytesIO()
+	output_pdf.write(pdf_bytes)
+	pdf_bytes.seek(0)
+	
+	return pdf_bytes.getvalue()

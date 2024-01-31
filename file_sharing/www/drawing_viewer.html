@@ -90,7 +90,7 @@ Drawing Viewer
           args: {
             file_url: filePath,
             supplier_name: supplierName,
-            is_private: parseInt("{{ allow_download }}", 10)
+            is_private: parseInt("{{ is_private }}", 10)
           },
           callback: function(response) {
               if (response.message) {
