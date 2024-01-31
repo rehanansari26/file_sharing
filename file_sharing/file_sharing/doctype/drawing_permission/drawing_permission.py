@@ -11,10 +11,14 @@ import math
 class DrawingPermission(Document):
 	def before_insert(self):
 		self.status = 'Draft'
+		for item in self.files:
+			if item.file_url:
+				item.child_status = 'Draft'
 
 	def before_save(self): #exceptional case
-		if self.attached_to_name:
-			self.email_id = frappe.db.get_value('Supplier', self.attached_to_name, 'email_id')
+		if not self.attached_to_name:
+			return
+		self.email_id = frappe.db.get_value('Supplier', self.attached_to_name, 'email_id')
 
 		if not self.item_code:
 			return
@@ -22,7 +26,7 @@ class DrawingPermission(Document):
 			file_urls = frappe.db.get_all('File', {'attached_to_doctype': 'Item', 'attached_to_name': self.item_code}, ['file_url'])
 			if not file_urls:
 				self.files = []
-				frappe.msgprint('File Not Found')
+
 			existing_file_urls = [row.file_url for row in self.files]
 			for file in file_urls:
 				if file.file_url not in existing_file_urls:
@@ -32,15 +36,52 @@ class DrawingPermission(Document):
 					row.child_status = 'Draft'
 		for item in self.files:
 			if item.view_based_sharing == 1 and item.views_allowed == 0:
-				frappe.throw('View is req')
+				frappe.throw('Please specify the number of views allowed for row ${item.idx} to enable sharing')
 			elif item.date_based_sharing == 1 and not item.from_date and not item.to_date:
-				frappe.throw('Date is req')
+				frappe.throw('Please specify the To Date for row ${item.idx} to enable sharing')
 
 	def before_submit(self):
+		drawing_permission_names = frappe.db.get_all(
+			'Drawing Permission', 
+			filters={
+				'attached_to_name': 'Element14', 
+				'item_code': '301010232', 
+				'status': 'Shared'
+			},
+			pluck='name'
+		)
+		if not drawing_permission_names:
+			return
+
+		shared_file_urls = frappe.db.get_all(
+			'Drawing Permission Item', 
+			filters={
+				'parent': ['in', drawing_permission_names], 
+				'child_status': 'Shared'
+			},
+			fields=['file_url'],
+			pluck='file_url'
+		)
+		for item in self.files:
+			if item.file_url in shared_file_urls:
+				frappe.throw(f'Duplicate entry: The file {frappe.bold(item.file_url)} is already shared')
+
 		if not self.attached_to_name:
-			frappe.throw('Supplier Name req	')
+			frappe.throw('To share, we need you to enter the supplier name first')
+			
+		if not self.files:
+			frappe.throw('To share, there must be a file in the files table. Please add a file before proceeding.')
+
 		self.status = 'Shared'
 		for item in self.files:
+			if not frappe.db.count('File', {'file_url': item.file_url, 'attached_to_name': item.child_item_code}) == 1:
+				frappe.msgprint(
+					'The file {1} has been attached multiple times to item {0}.'.format(
+						frappe.bold(item.child_item_code), frappe.bold(item.file_url)
+					),
+					title='Duplicate File Warning',
+					indicator='red'
+				)
 			item.child_status = 'Shared'
 
 		if self.email_id and self.send_email == 1:
@@ -54,8 +95,6 @@ class DrawingPermission(Document):
 					details += f", valid from {valid_from} to {valid_to}"
 				if item.view_based_sharing == 1:
 					details += f", valid for {item.views_allowed} views"
-				# if item.file_url:
-				# 	details += f", <a href='{item.file_url}'>View Drawing</a>"
 				item_details.append(details)
 
 			message = f"Dear Supplier,<br><br>The following drawings have been shared with you:<br><br>"
@@ -77,7 +116,12 @@ class DrawingPermission(Document):
 
 @frappe.whitelist()
 def get_item_drawing_file_urls(item_code):
-    return frappe.db.get_all('File', {'attached_to_doctype': 'Item', 'attached_to_name': item_code}, ['file_url']) or None
+	file_data = frappe.db.get_all('File', {'attached_to_doctype': 'Item', 'attached_to_name': item_code}, ['file_url'])
+	if not file_data:
+		return None
+	file_urls = [file_entry['file_url'] for file_entry in file_data]
+	unique_file_urls = list(set(file_urls))
+	return unique_file_urls
 	
 @frappe.whitelist()
 def log_view_if_not_expired(reference_name):
@@ -93,10 +137,11 @@ def log_view_if_not_expired(reference_name):
         	}).insert(ignore_permissions=True,ignore_mandatory=True)
 		doc.save()
 
-def auto_expired():
-	shared_list = frappe.db.get_all('Drawing Permission Item', {'status': 'Shared', 'to_date': ['<', frappe.utils.nowdate()]}, pluck='name')
-	if shared_list:
-		frappe.db.set_value('Drawing Permission Item', shared_list, 'child_status', 'Expired')
+def auto_expire_drawings_by_date():
+	sharedDrawingsToExpire = frappe.db.get_all('Drawing Permission Item', {'status': 'Shared', 'to_date': ['<', frappe.utils.nowdate()]}, pluck='name')
+	if not sharedDrawingsToExpire:
+		return
+	frappe.db.set_value('Drawing Permission Item', sharedDrawingsToExpire, 'child_status', 'Expired')
 
 @frappe.whitelist()	
 def get_watermarked_pdf(file_url, supplier_name):

@@ -53,9 +53,8 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 2,
-   "default": "Draft",
-   "depends_on": "eval:parent.__islocal == undefined && doc.file_url",
+   "columns": 1,
+   "depends_on": "eval:!parent.__islocal && doc.file_url",
    "fieldname": "child_status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -65,18 +64,24 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "default": "0",
    "depends_on": "eval:parent.attached_to_name && doc.file_url",
    "fieldname": "date_based_sharing",
    "fieldtype": "Check",
-   "label": "Date Based Sharing"
+   "in_list_view": 1,
+   "label": "Date Based Sharing",
+   "no_copy": 1
   },
   {
+   "columns": 2,
    "default": "0",
    "depends_on": "eval:parent.attached_to_name && doc.file_url",
    "fieldname": "view_based_sharing",
    "fieldtype": "Check",
-   "label": "View Based Sharing"
+   "in_list_view": 1,
+   "label": "View Based Sharing",
+   "no_copy": 1
   },
   {
    "columns": 2,
@@ -85,21 +90,20 @@
    "fieldname": "allow_download",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Allow Download"
+   "label": "Allow Download",
+   "no_copy": 1
   },
   {
-   "depends_on": "eval:parent.attached_to_name && doc.view_based_sharing == 1",
+   "depends_on": "view_based_sharing",
    "fieldname": "views_section",
    "fieldtype": "Section Break",
    "label": "Views"
   },
   {
-   "columns": 1,
-   "depends_on": "eval:doc.file_url && parent.docstatus == 1",
    "fieldname": "views",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Views",
+   "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
   },
@@ -108,26 +112,25 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 2,
-   "depends_on": "file_url",
    "fieldname": "views_allowed",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Views Allowed",
+   "mandatory_depends_on": "view_based_sharing",
+   "no_copy": 1,
    "non_negative": 1
   },
   {
-   "depends_on": "eval:parent.attached_to_name && doc.date_based_sharing == 1",
+   "depends_on": "date_based_sharing",
    "fieldname": "date_section",
    "fieldtype": "Section Break",
    "label": "Date"
   },
   {
    "default": "Today",
-   "depends_on": "file_url",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -135,13 +138,14 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "file_url",
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date"
+   "label": "To Date",
+   "mandatory_depends_on": "date_based_sharing",
+   "no_copy": 1
   },
   {
-   "depends_on": "eval:doc.views > 0",
+   "depends_on": "views > 0",
    "fieldname": "view_log_display",
    "fieldtype": "Button",
    "label": "View log"
@@ -150,7 +154,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-01-30 15:59:17.317752",
+ "modified": "2024-01-31 10:35:04.088051",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "Drawing Permission Item",
