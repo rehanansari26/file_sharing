@@ -24,17 +24,18 @@ class DrawingPermission(Document):
 		if not self.item_code:
 			return
 		if not self.files: #clash with client side call
-			file_urls = frappe.db.get_all('File', {'attached_to_doctype': 'Item', 'attached_to_name': self.item_code}, ['file_url'])
+			file_urls = frappe.db.get_all('File', {'attached_to_doctype': 'Item', 'attached_to_name': self.item_code}, ['file_url', 'is_private'])
 			if not file_urls:
 				self.files = []
-
 			existing_file_urls = [row.file_url for row in self.files]
 			for file in file_urls:
 				if file.file_url not in existing_file_urls:
 					row = self.append('files', {})
 					row.child_item_code = self.item_code
 					row.file_url = file.file_url
+					row.is_private = file.is_private
 					row.child_status = 'Draft'
+
 		for item in self.files:
 			if item.view_based_sharing == 1 and item.views_allowed == 0:
 				frappe.throw('Please specify the number of views allowed for row ${item.idx} to enable sharing')
@@ -97,12 +98,12 @@ class DrawingPermission(Document):
 
 @frappe.whitelist()
 def get_item_drawing_file_urls(item_code):
-	file_data = frappe.db.get_all('File', {'attached_to_doctype': 'Item', 'attached_to_name': item_code}, ['file_url'])
+	file_data = frappe.db.get_all('File',{'attached_to_doctype': 'Item', 'attached_to_name': item_code},['file_url', 'is_private'])	
 	if not file_data:
 		return None
-	file_urls = [file_entry['file_url'] for file_entry in file_data]
-	unique_file_urls = list(set(file_urls))
-	return unique_file_urls
+	file_info = [{'file_url': file_entry['file_url'], 'is_private': file_entry['is_private']} for file_entry in file_data]
+	unique_file_info = {entry['file_url']: entry for entry in file_info}.values()
+	return list(unique_file_info)
 	
 @frappe.whitelist()
 def log_view_if_not_expired(reference_name):
@@ -151,8 +152,9 @@ def check_duplicate_shared_files(self):
 			frappe.throw(f'Duplicate entry: The file {frappe.bold(file.file_url)} is already shared')
 
 @frappe.whitelist()	
-def get_watermarked_pdf(file_url, supplier_name):
-    input_pdf = PdfReader(frappe.get_site_path('public', 'files', file_url.split('/')[-1]))
+def get_watermarked_pdf(file_url, supplier_name, is_private):
+	status = 'private' if is_private == 1 else 'public'
+    input_pdf = PdfReader(frappe.get_site_path(status, 'files', file_url.split('/')[-1]))
     watermark_text = supplier_name
     watermark_opacity = 0.3
     watermark_angle = 45

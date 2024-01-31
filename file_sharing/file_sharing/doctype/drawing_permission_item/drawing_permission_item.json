@@ -9,11 +9,12 @@
   "child_item_code",
   "file_url",
   "file_display",
-  "column_break_awln",
+  "column_break_bbem",
   "child_status",
   "date_based_sharing",
   "view_based_sharing",
   "allow_download",
+  "is_private",
   "views_section",
   "views",
   "view_log_display",
@@ -47,10 +48,6 @@
    "fieldname": "file_display",
    "fieldtype": "Button",
    "label": "Open"
-  },
-  {
-   "fieldname": "column_break_awln",
-   "fieldtype": "Column Break"
   },
   {
    "columns": 1,
@@ -149,12 +146,25 @@
    "fieldname": "view_log_display",
    "fieldtype": "Button",
    "label": "View log"
+  },
+  {
+   "default": "0",
+   "depends_on": "file_url",
+   "fieldname": "is_private",
+   "fieldtype": "Check",
+   "label": "Is Private",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_bbem",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-01-31 10:35:04.088051",
+ "modified": "2024-01-31 14:39:49.340783",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "Drawing Permission Item",

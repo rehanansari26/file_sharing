@@ -89,7 +89,8 @@ Drawing Viewer
           method: "file_sharing.file_sharing.doctype.drawing_permission.drawing_permission.get_watermarked_pdf",
           args: {
             file_url: filePath,
-            supplier_name: supplierName
+            supplier_name: supplierName,
+            is_private: parseInt("{{ allow_download }}", 10)
           },
           callback: function(response) {
               if (response.message) {

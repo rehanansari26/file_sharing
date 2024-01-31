@@ -54,11 +54,12 @@ frappe.ui.form.on('Drawing Permission', {
 					callback: function (res) {
 						if (res.message && res.message.length > 0) {
 							let fileData = res.message;
-							frm.set_value('files', [])
-							fileData.forEach(file_url => {
+							frm.set_value('files', []);
+							fileData.forEach(data => {
 								let child_row = frm.add_child('files');
 								child_row.child_item_code = frm.doc.item_code;
-								child_row.file_url = file_url;
+								child_row.file_url = data.file_url;
+								child_row.is_private = data.is_private;
 								child_row.child_status = 'Draft';
 							});
 							frm.refresh_field('files');
@@ -87,11 +88,12 @@ frappe.ui.form.on('Drawing Permission', {
 				callback: function (res) {
 					if (res.message && res.message.length > 0) {
 						let fileData = res.message;
-						frm.set_value('files', [])
-						fileData.forEach(file_url => {
+						frm.set_value('files', []);
+						fileData.forEach(data => {
 							let child_row = frm.add_child('files');
 							child_row.child_item_code = frm.doc.item_code;
-							child_row.file_url = file_url;
+							child_row.file_url = data.file_url;
+							child_row.is_private = data.is_private;
 							child_row.child_status = 'Draft';
 						});
 						frm.refresh_field('files');
