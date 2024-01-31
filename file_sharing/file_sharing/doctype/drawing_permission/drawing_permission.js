@@ -144,8 +144,8 @@ frappe.ui.form.on('Drawing Permission Item', {
 	file_display: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		let baseUrl = window.location.origin;
-		window.location.href = `${baseUrl}${d.file_url}`
-	},
+		window.open(`${baseUrl}${d.file_url}`, '_blank');
+	},	
     view_log_display: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
         let baseUrl = window.location.origin;
