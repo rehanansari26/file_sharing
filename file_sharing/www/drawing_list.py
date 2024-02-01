@@ -12,7 +12,7 @@ def get_context(context):
     if not context.supplier:
         frappe.throw("You are not registered as a portal user.", frappe.PermissionError)
 
-    context.drawing_permissions = frappe.db.get_all('Drawing Permission',{'attached_to_name': context.supplier, 'status': 'Shared'}, pluck='name') or None
+    context.drawing_permissions = frappe.db.get_all('Drawing Permission',{'attached_to_name': context.supplier, 'docstatus': 1, 'status': 'Shared'}, pluck='name') or None
     if not context.drawing_permissions:
         frappe.throw("No drawings have been shared with you.", frappe.PermissionError)
 
