@@ -39,9 +39,9 @@ class DrawingPermission(Document):
 
 		for item in self.files:
 			if item.view_based_sharing == 1 and item.views_allowed == 0:
-				frappe.throw('Please specify the number of views allowed for row ${item.idx} to enable sharing')
+				frappe.throw(f'Please specify the number of views allowed for row {item.idx} to enable sharing')
 			elif item.date_based_sharing == 1 and not item.from_date and not item.to_date:
-				frappe.throw('Please specify the To Date for row ${item.idx} to enable sharing')
+				frappe.throw(f'Please specify the To Date for row {item.idx} to enable sharing')
 
 	#def on_submit(self):
 			
