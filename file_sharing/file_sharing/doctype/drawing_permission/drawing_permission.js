@@ -158,6 +158,7 @@ frappe.ui.form.on('Drawing Permission Item', {
 		var d = locals[cdt][cdn];
 		if (d.from_date && d.to_date && d.to_date < d.from_date) {
 			frappe.throw('To Date should be greater than from date')
+			frm.fields_dict['files'].grid.grid_rows_by_docname[cdn].get_field('to_date').set_value(null);
 		}
 	}
 })
