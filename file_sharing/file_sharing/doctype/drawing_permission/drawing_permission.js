@@ -32,6 +32,9 @@ frappe.ui.form.on('Drawing Permission', {
                     messages.push(`'${file.file_url}': ${views_remaining} view(s) left`);
 
                 }
+				else if (frm.doc.status == 'Expired') {
+					messages.push('Expired')
+				}
                 else {
                     messages.push(`'${file.file_url}': Supplier can view this unlimited times`);
                 }
