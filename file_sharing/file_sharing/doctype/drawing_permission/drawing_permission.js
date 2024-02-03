@@ -155,6 +155,7 @@ frappe.ui.form.on('Drawing Permission Item', {
 		var d = locals[cdt][cdn];
 		if (d.from_date && d.to_date && d.to_date < d.from_date) {
 			frappe.throw('To Date should be greater than from date')
+			d.to_date = null
 		}
 	}
 })

@@ -58,8 +58,10 @@ Drawing Viewer
     if (drawingStatus !== 'Expired') {
         if (filePath.endsWith('.pdf')) {
             renderPDFDocument();
+            disableRightClick();
         } else if (filePath.endsWith('.glb')) {
             renderModel(filePath);
+            disableRightClick();
         }
     } else {
         showExpiredLabel();
@@ -143,6 +145,12 @@ Drawing Viewer
           console.error('Error loading PDF: ', error);
       });
     }
+    frappe.call({
+        method: "file_sharing.file_sharing.doctype.drawing_permission.drawing_permission.log_view_if_not_expired",
+        args: {
+            reference_name: frappe.form_dict.get('query')
+        }
+    });
 
     function showExpiredLabel() {
       document.body.appendChild(Object.assign(document.createElement('div'), {
@@ -150,6 +158,13 @@ Drawing Viewer
         className: 'expired-label'
       }));
     }
+
+    function disableRightClick() {
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
+    }
+
 </script>
 
 {% endblock %}
