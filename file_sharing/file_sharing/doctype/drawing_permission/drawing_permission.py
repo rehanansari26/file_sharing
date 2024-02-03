@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from pypdf import PdfWriter, PdfReader
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from io import BytesIO
 import math
 
@@ -38,9 +39,9 @@ class DrawingPermission(Document):
 
 		for item in self.files:
 			if item.view_based_sharing == 1 and item.views_allowed == 0:
-				frappe.throw('Please specify the number of views allowed for row ${item.idx} to enable sharing')
+				frappe.throw(f'Please specify the number of views allowed for row {item.idx} to enable sharing')
 			elif item.date_based_sharing == 1 and not item.from_date and not item.to_date:
-				frappe.throw('Please specify the To Date for row ${item.idx} to enable sharing')
+				frappe.throw(f'Please specify the To Date for row {item.idx} to enable sharing')
 
 	#def on_submit(self):
 			
@@ -153,49 +154,54 @@ def check_duplicate_shared_files(self):
 
 @frappe.whitelist()	
 def get_watermarked_pdf(file_url, supplier_name, is_private):
-	status = 'private' if int(is_private) == 1 else 'public'
-	input_pdf = PdfReader(frappe.get_site_path(status, 'files', file_url.split('/')[-1]))
-	watermark_text = supplier_name
-	watermark_opacity = 0.3
-	watermark_angle = 45
-	watermark_font_size = 18
-	text_width = 100
-	text_height = 100
-	
-	watermark = BytesIO()
-	c = canvas.Canvas(watermark)
-	
-	page_width = input_pdf.pages[0].mediabox[2]
-	page_height = input_pdf.pages[0].mediabox[3]
-	diagonal = int(math.sqrt(page_width ** 2 + page_height ** 2))
-	x_offset = -diagonal
-	while x_offset < diagonal:
-		y_offset = -diagonal
-		while y_offset < diagonal:
-			c.saveState()
-			c.translate(x_offset, y_offset)
-			c.rotate(watermark_angle)
-			c.setFillColorRGB(0, 0, 0, watermark_opacity)
-			c.setFont("Helvetica", watermark_font_size)
-			c.drawString(0, 0, watermark_text)
-			c.restoreState()
-			y_offset += text_height
-		x_offset += text_width
-		
-	c.save()
-	watermark.seek(0)
-	
-	output_pdf = PdfWriter()
-	
-	for i in range(len(input_pdf.pages)):
-		page = input_pdf.pages[i]
-		watermark_reader = PdfReader(watermark)
-		watermark_page = watermark_reader.pages[0]
-		page.merge_page(watermark_page)
-		output_pdf.add_page(page)\
-	
-	pdf_bytes = BytesIO()
-	output_pdf.write(pdf_bytes)
-	pdf_bytes.seek(0)
-	
-	return pdf_bytes.getvalue()
+    status = 'private' if int(is_private) == 1 else 'public'
+    # Replace this with your actual file path retrieval
+    input_pdf = PdfReader(frappe.get_site_path(status, 'files', file_url.split('/')[-1]))  # file_url should be the local path to the PDF file
+    watermark_text = supplier_name
+    watermark_opacity = 0.1  # Reduced opacity for better readability of the original content
+    watermark_angle = 45
+    watermark_font_size = 18  # Adjust as needed
+
+    output_pdf = PdfWriter()
+
+    for page in input_pdf.pages:
+        page_width = page.mediabox[2]
+        page_height = page.mediabox[3]
+
+        # Create a watermark canvas that matches the size of the current page
+        watermark = BytesIO()
+        c = canvas.Canvas(watermark, pagesize=(page_width, page_height))
+
+        # Increase the step size to add more space between watermarks
+        step_size = max(watermark_font_size * 4, 100)  # Adjust as needed
+        num_watermarks_x = int(page_width / step_size) + 2
+        num_watermarks_y = int(page_height / step_size) + 2
+
+        # Loop to cover the page diagonally with watermarks
+        for x in range(num_watermarks_x):
+            for y in range(num_watermarks_y):
+                c.saveState()
+                # Translate to the position where the watermark will be drawn
+                c.translate((x - 1) * step_size, (y - 1) * step_size)
+                c.rotate(watermark_angle)
+                c.setFillColorRGB(0, 0, 0, watermark_opacity)
+                c.setFont("Helvetica", watermark_font_size)
+                # Draw the watermark text
+                c.drawString(0, 0, watermark_text)
+                c.restoreState()
+
+        c.save()
+        watermark.seek(0)
+
+        watermark_reader = PdfReader(watermark)
+        watermark_page = watermark_reader.pages[0]
+
+        # Merge the watermark page with the current page
+        page.merge_page(watermark_page)
+        output_pdf.add_page(page)
+
+    pdf_bytes = BytesIO()
+    output_pdf.write(pdf_bytes)
+    pdf_bytes.seek(0)
+
+    return pdf_bytes.getvalue()

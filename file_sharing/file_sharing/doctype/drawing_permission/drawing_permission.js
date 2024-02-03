@@ -32,6 +32,9 @@ frappe.ui.form.on('Drawing Permission', {
                     messages.push(`'${file.file_url}': ${views_remaining} view(s) left`);
 
                 }
+				else if (frm.doc.status == 'Expired') {
+					messages.push('Expired')
+				}
                 else {
                     messages.push(`'${file.file_url}': Supplier can view this unlimited times`);
                 }
@@ -155,7 +158,11 @@ frappe.ui.form.on('Drawing Permission Item', {
 		var d = locals[cdt][cdn];
 		if (d.from_date && d.to_date && d.to_date < d.from_date) {
 			frappe.throw('To Date should be greater than from date')
+<<<<<<< HEAD
 			d.to_date = null
+=======
+			frm.fields_dict['files'].grid.grid_rows_by_docname[cdn].get_field('to_date').set_value(null);
+>>>>>>> 50e7a655a16d01e84161848c4773c08332b958ab
 		}
 	}
 })
