@@ -1,5 +1,5 @@
 import frappe
-
+no_cache = 1
 def get_context(context):
     if not 'Supplier' in frappe.get_roles():
         frappe.throw("This page is only accessible to suppliers.", frappe.PermissionError)
