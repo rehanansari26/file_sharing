@@ -50,7 +50,6 @@
   {
    "columns": 2,
    "default": "0",
-   "depends_on": "eval:parent.attached_to_name && doc.file_url",
    "fieldname": "date_based_sharing",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -60,7 +59,6 @@
   {
    "columns": 2,
    "default": "0",
-   "depends_on": "eval:parent.attached_to_name && doc.file_url",
    "fieldname": "view_based_sharing",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -70,7 +68,6 @@
   {
    "columns": 2,
    "default": "0",
-   "depends_on": "eval:parent.attached_to_name && doc.file_url",
    "fieldname": "allow_download",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -170,7 +167,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-06 12:26:44.773020",
+ "modified": "2024-02-06 15:26:34.839430",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",

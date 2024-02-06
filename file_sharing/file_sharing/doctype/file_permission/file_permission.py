@@ -94,8 +94,8 @@ def validate_files_before_sharing(self):
 		
 	if not self.files:
 		frappe.throw('To share, there must be a file in the files table. Please add a file before proceeding.')
-	
-	for item in self.files:validate_files_before_sharing
+
+	for item in self.files:
 		if not frappe.db.count('File', {'file_url': item.file_url, 'attached_to_name': item.child_file_reference}) == 1:
 			frappe.msgprint(
 				'The file {1} has been attached multiple times to item {0}.'.format(
@@ -108,7 +108,7 @@ def validate_files_before_sharing(self):
 def send_email_with_file_details(self):
 	email = self.email_id
 	if is_valid_email(email_id):
-    	frappe.msgprint(f"{email_id} is not a valid email address.")
+		frappe.msgprint(f"{email_id} is not a valid email address.")
 		return
 
 	item_details = []
