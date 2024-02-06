@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestDrawingViewLog(FrappeTestCase):
+class TestFileViewLog(FrappeTestCase):
 	pass

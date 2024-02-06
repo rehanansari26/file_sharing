@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestDrawingPermission(FrappeTestCase):
+class TestFilePermission(FrappeTestCase):
 	pass

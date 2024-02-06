@@ -6,9 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "child_item_code",
+  "file_info_section",
+  "child_file_reference",
   "file_url",
-  "file_display",
+  "open_file",
   "column_break_bbem",
   "child_status",
   "date_based_sharing",
@@ -16,8 +17,8 @@
   "allow_download",
   "is_private",
   "views_section",
-  "views",
-  "view_log_display",
+  "views_seen",
+  "open_view_log",
   "column_break_rkcp",
   "views_allowed",
   "date_section",
@@ -27,14 +28,6 @@
  ],
  "fields": [
   {
-   "depends_on": "file_url",
-   "fieldname": "child_item_code",
-   "fieldtype": "Link",
-   "label": "Item Code",
-   "options": "Item",
-   "read_only": 1
-  },
-  {
    "columns": 3,
    "fieldname": "file_url",
    "fieldtype": "Data",
@@ -42,12 +35,6 @@
    "label": "File URL",
    "read_only": 1,
    "reqd": 1
-  },
-  {
-   "depends_on": "file_url",
-   "fieldname": "file_display",
-   "fieldtype": "Button",
-   "label": "Open"
   },
   {
    "columns": 1,
@@ -97,24 +84,8 @@
    "label": "Views"
   },
   {
-   "fieldname": "views",
-   "fieldtype": "Int",
-   "label": "Views",
-   "no_copy": 1,
-   "non_negative": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_rkcp",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "views_allowed",
-   "fieldtype": "Int",
-   "label": "Views Allowed",
-   "mandatory_depends_on": "view_based_sharing",
-   "no_copy": 1,
-   "non_negative": 1
   },
   {
    "depends_on": "date_based_sharing",
@@ -142,12 +113,6 @@
    "no_copy": 1
   },
   {
-   "depends_on": "views > 0",
-   "fieldname": "view_log_display",
-   "fieldtype": "Button",
-   "label": "View log"
-  },
-  {
    "default": "0",
    "depends_on": "file_url",
    "fieldname": "is_private",
@@ -159,15 +124,56 @@
   {
    "fieldname": "column_break_bbem",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "file_url",
+   "fieldname": "child_file_reference",
+   "fieldtype": "Link",
+   "label": "File Reference",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "views_allowed",
+   "fieldtype": "Int",
+   "label": "Views Allowed",
+   "mandatory_depends_on": "view_based_sharing",
+   "no_copy": 1,
+   "non_negative": 1
+  },
+  {
+   "fieldname": "file_info_section",
+   "fieldtype": "Section Break",
+   "label": "File Info"
+  },
+  {
+   "depends_on": "file_url",
+   "fieldname": "open_file",
+   "fieldtype": "Button",
+   "label": "Open File"
+  },
+  {
+   "depends_on": "views > 0",
+   "fieldname": "open_view_log",
+   "fieldtype": "Button",
+   "label": "Open View log"
+  },
+  {
+   "fieldname": "views_seen",
+   "fieldtype": "Int",
+   "label": "Views Seen",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-01-31 14:39:49.340783",
+ "modified": "2024-02-06 12:26:44.773020",
  "modified_by": "Administrator",
  "module": "File Sharing",
- "name": "Drawing Permission Item",
+ "name": "File Permission Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

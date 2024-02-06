@@ -1,18 +1,21 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:FS-{YY}-{####}",
  "creation": "2024-01-22 14:11:10.873709",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item_code",
-  "item_name",
+  "details_section",
+  "file_doctype",
+  "file_reference",
+  "file_reference_name",
   "status",
   "column_break_snvxm",
-  "attached_to_doctype",
-  "attached_to_name",
+  "user_doctype",
+  "user_reference",
   "email_id",
   "send_email",
   "amended_from",
@@ -20,22 +23,6 @@
   "files"
  ],
  "fields": [
-  {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "label": "Item Code",
-   "options": "Item",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "item_code.item_name",
-   "fetch_if_empty": 1,
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "label": "Item Name",
-   "no_copy": 1,
-   "read_only": 1
-  },
   {
    "fieldname": "status",
    "fieldtype": "Select",
@@ -49,43 +36,27 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Supplier",
-   "fieldname": "attached_to_doctype",
-   "fieldtype": "Link",
-   "label": "Attached To DocType",
-   "options": "DocType",
-   "read_only": 1
-  },
-  {
-   "fieldname": "attached_to_name",
-   "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
-   "label": "Supplier Name",
-   "options": "attached_to_doctype"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Drawing Permission",
+   "options": "File Permission",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
   },
   {
    "fieldname": "section_break_rpgn",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Files"
   },
   {
-   "depends_on": "item_code",
    "fieldname": "files",
    "fieldtype": "Table",
    "label": "Files",
-   "options": "Drawing Permission Item"
+   "options": "File Permission Item"
   },
   {
-   "depends_on": "attached_to_name",
    "fieldname": "email_id",
    "fieldtype": "Data",
    "label": "Email Id",
@@ -100,15 +71,60 @@
    "fieldtype": "Check",
    "label": "Send Email",
    "no_copy": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Access Details"
+  },
+  {
+   "default": "Item",
+   "fieldname": "file_doctype",
+   "fieldtype": "Link",
+   "label": "File DocType",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "file_reference",
+   "fieldtype": "Dynamic Link",
+   "label": "File Reference",
+   "options": "file_doctype",
+   "reqd": 1
+  },
+  {
+   "default": "Supplier",
+   "fieldname": "user_doctype",
+   "fieldtype": "Link",
+   "label": "User DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_reference",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "User Reference",
+   "options": "user_doctype"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "file_reference_name",
+   "fieldtype": "Data",
+   "label": "File Reference Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-31 12:52:52.041789",
+ "modified": "2024-02-06 13:33:32.144586",
  "modified_by": "Administrator",
  "module": "File Sharing",
- "name": "Drawing Permission",
+ "name": "File Permission",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -128,28 +144,20 @@
  "sort_order": "DESC",
  "states": [
   {
-   "color": "Blue",
+   "color": "Red",
    "title": "Draft"
-  },
-  {
-   "color": "Cyan",
-   "title": "Ready to Share"
-  },
-  {
-   "color": "Gray",
-   "title": "Time-Limited Shared"
   },
   {
    "color": "Green",
    "title": "Shared"
   },
   {
-   "color": "Orange",
+   "color": "Cyan",
    "title": "Expired"
   },
   {
-   "color": "Yellow",
-   "title": "Archived"
+   "color": "Orange",
+   "title": "Cancelled"
   }
  ]
 }

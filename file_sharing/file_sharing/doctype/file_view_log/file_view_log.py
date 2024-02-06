@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 
 
-class DrawingViewLog(Document):
+class FileViewLog(Document):
 	def after_insert(self):
 		if self.reference_document == "Drawing Permission":
 

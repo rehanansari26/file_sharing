@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class DrawingPermissionItem(Document):
+class FilePermissionItem(Document):
 	pass

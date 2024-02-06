@@ -90,7 +90,7 @@ Drawing Viewer
 
     function renderPDFDocument() {
       frappe.call({
-          method: "file_sharing.file_sharing.doctype.drawing_permission.drawing_permission.get_watermarked_pdf",
+          method: "file_sharing.file_sharing.doctype.file_permission.file_permission.get_watermarked_pdf",
           args: {
             file_url: filePath,
             supplier_name: supplierName,
@@ -166,7 +166,7 @@ Drawing Viewer
         let urlParams = new URLSearchParams(new URL(currentUrl).search);
         let value = urlParams.get('query');
         frappe.call({
-            method: "file_sharing.file_sharing.doctype.drawing_permission.drawing_permission.log_view_if_not_expired",
+            method: "file_sharing.file_sharing.doctype.file_permission.file_permission.log_view_if_not_expired",
             args: {
                 "reference_name": value
             }

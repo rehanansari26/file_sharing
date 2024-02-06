@@ -30,7 +30,7 @@
             <tbody id="shared-drawing-detail"></tbody>
             <tfoot>
                 <tr>
-                    <td colspan="6">0 of 0</td>
+                    <td colspan="4">0 of 0</td>
                 </tr>
             </tfoot>
         </table>
@@ -133,7 +133,7 @@
                 row.appendChild(createTextCell(item.child_item_code ?? 'N/A'));
                 row.appendChild(createTextCell(item.item_name ?? 'N/A'));
                 row.appendChild(createLinkCell('View', `/drawing_viewer?query=${encodeURIComponent(item.name)}`));
-                row.appendChild(createTextCell(item.views_allowed == 0 ? 'Unlimited' : item.views_allowed - item.views));
+                row.appendChild(createTextCell(item.views_allowed == 0 ? 'Unlimited' : item.views_allowed - item.views_seen));
                 row.appendChild(createTextCell(item.name ?? 'N/A'));
                 row.appendChild(createTextCell(item.parent ?? 'N/A'));
                 return row;
