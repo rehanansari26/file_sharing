@@ -5,12 +5,10 @@
 {% block page_content %}
 
 {% if frappe.session.user == 'Guest' %}
-
     {{ frappe.throw(_("Log in to access this page."), frappe.PermissionError) }}
-
 {% else %}
     <div class="welcome-message">
-        <h2>Welcome, {{ supplier or "Valued Supplier" }}</h2>
+        <h2 id="dynamic-greeting">Welcome, {{ supplier or "Valued Supplier" }}</h2>
     </div>
 
     <div class="main-div">
@@ -19,18 +17,16 @@
                 <tr>
                     <th scope="col">Item Code</th>
                     <th scope="col">Item Name</th>
-                    <th scope="col">Drawing</th>
-                    <th scope="col">Views Left</th>
-                    <!-- Child Name -->
-                    <th scope="col">Ref ID</th>
-                    <!-- Parent Name -->
+                    <th scope="col">File</th>
+                    <th scope="col">Validity</th>
+                    <th scope="col" class="hide-column">Ref ID</th> <!-- Hidden Column -->
                     <th scope="col">ID</th>
                 </tr>
             </thead>
             <tbody id="shared-drawing-detail"></tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4">0 of 0</td>
+                    <td colspan="6">0 of 0</td>
                 </tr>
             </tfoot>
         </table>
@@ -45,118 +41,189 @@
 
 {% block style %}
 
-    <style>
-        .welcome-message {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 24px;
-        }
-        .main-div {
-            width: auto;
-            margin: auto;
-        }
-        .main-div .text-center {
-            text-align: center;
-        }
-        table {
-            margin-bottom: 20px;
-            border-collapse: collapse;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: white;
-        }
-        th {
-            background-color: #f5f5f5;
-        }
-        #shared-drawing-list th {
-            width: 200px;
-        }
+<style>
+    .hide-column {
+        display: none;
+    }
+    .welcome-message {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 24px;
+    }
+    .main-div {
+        width: auto;
+        margin: auto;
+    }
+    .main-div .text-center {
+        text-align: center;
+    }
+    table {
+        margin-bottom: 20px;
+        border-collapse: collapse;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        width: 100%;
+    }
+    table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    table tr:hover {
+        background-color: #ddd;
+    }
+    th {
+        background-color: #f5f5f5;
+    }
+    #shared-drawing-list th {
+        width: 200px;
+    }
+    #shared-drawing-list th:nth-child(3),
+    #shared-drawing-list th:nth-child(4) {
+        width: 150px;
+    }
+    th, td {
+        border: 1px solid #e0e0e0;
+        text-align: left;
+        padding: 12px;
+    }
+    tfoot {
+        background-color: #f5f5f5;
+    }
+    #load-more {
+        background-color: #241c1c;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s;
+        display: block;
+        margin-left: auto;
+        margin-right: 20px;
+    }
+    #load-more:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+    .btn-style {
+        text-decoration: none;
+        color: #fff;
+        background-color: #241c1c;
+        padding: 3px 15px;
+        border-radius: 5px;
+        display: inline-block;
+        text-align: center;
+        margin: 5px;
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .btn-style:hover {
+        background-color: #000000;
+        color: #ffffff;
+    }
 
-        #shared-drawing-list th:nth-child(3),
-        #shared-drawing-list th:nth-child(4) {
-            width: 150px;
-        }
-        th, td {
-            border: 1px solid #e0e0e0;
-            text-align: left;
-            padding: 12px;
-        }
-        tfoot {
-            background-color: #f5f5f5;
-        }
-        #load-more {
-            background-color: #fff;
-            color: #333;
-            border: 1px solid #333;
-            border-radius: 5px;
-            padding: 8px 16px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        #load-more:hover {
-            background-color: #333;
-            color: #fff;
-        }
-    </style>
+</style>
 
 {% endblock %}
 
 {% block script %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const drawingDetails = JSON.parse('{{ drawing_permission_details | tojson | safe }}');
-            const tableBody = document.getElementById('shared-drawing-detail');
-            const loadMoreButton = document.getElementById('load-more');
-            const footer = document.querySelector('tfoot td');
-            let currentIndex = 0;
-            const itemsPerPage = 10;
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const hour = now.getHours();
+        let greeting;
+        if (hour < 12) greeting = 'Good Morning';
+        else if (hour < 18) greeting = 'Good Afternoon';
+        else greeting = 'Good Evening';
+        
+        document.getElementById('dynamic-greeting').textContent = `${greeting}, {{ supplier or 'Valued Supplier' }}`;
 
-            function createLinkCell(text, href) {
-                const link = document.createElement('a');
-                link.href = href;
-                link.textContent = text;
-                const cell = document.createElement('td');
-                cell.appendChild(link);
-                return cell;
+        const drawingDetails = JSON.parse('{{ drawing_permission_details | tojson | safe }}');
+        const tableBody = document.getElementById('shared-drawing-detail');
+        const loadMoreButton = document.getElementById('load-more');
+        const footer = document.querySelector('tfoot td');
+        let currentIndex = 0;
+        const itemsPerPage = 10;
+
+        function createLinkCell(text, href) {
+            const link = document.createElement('a');
+            link.href = href;
+            link.textContent = text;
+            link.className = 'btn-style';
+
+            const cell = document.createElement('td');
+            cell.appendChild(link);
+            return cell;
+        }
+
+        function createTextCell(text, style = {}) {
+            const cell = document.createElement('td');
+            cell.innerHTML = text;
+            Object.assign(cell.style, style);
+            return cell;
+        }
+
+        function createViewText(item) {
+            if (item.date_based_sharing && item.view_based_sharing) {
+                const viewsLeft = item.views_allowed - (item.views_seen ?? 0);
+                return `${viewsLeft} Views <br>Till: 12-June-2023`;
+            } else if (item.date_based_sharing == 1 && item.view_based_sharing == 0) {
+                return 'Unlimited <br>Till: 12-June-2023';
+            } else if (item.date_based_sharing == 0 && item.view_based_sharing == 1) {
+                return `${item.views_allowed - (item.views_seen ?? 0)} Views Left`;
             }
+            return 'Unlimited';
+        }
 
-            function createTextCell(text) {
-                const cell = document.createElement('td');
-                cell.textContent = text;
-                return cell;
-            }
+        function createTableRow(item) {
+            const row = document.createElement('tr');
+            const cellValues = [
+                item.child_file_reference ?? 'N/A',
+                item.item_name ?? 'N/A',
+                'View',
+                createViewText(item),
+                item.child_file_reference ?? 'N/A',
+                item.parent ?? 'N/A'
+            ];
 
-            function createTableRow(item) {
-                const row = document.createElement('tr');
-                row.appendChild(createTextCell(item.child_item_code ?? 'N/A'));
-                row.appendChild(createTextCell(item.item_name ?? 'N/A'));
-                row.appendChild(createLinkCell('View', `/drawing_viewer?query=${encodeURIComponent(item.name)}`));
-                row.appendChild(createTextCell(item.views_allowed == 0 ? 'Unlimited' : item.views_allowed - item.views_seen));
-                row.appendChild(createTextCell(item.name ?? 'N/A'));
-                row.appendChild(createTextCell(item.parent ?? 'N/A'));
-                return row;
-            }
-
-            function loadItems() {
-                const endIndex = Math.min(currentIndex + itemsPerPage, drawingDetails.length);
-                for (let i = currentIndex; i < endIndex; i++) {
-                    tableBody.appendChild(createTableRow(drawingDetails[i]));
+            cellValues.forEach((cellValue, index) => {
+                let cell;
+                if (index === 2) {
+                    cell = createLinkCell('View', `/drawing_viewer?query=${encodeURIComponent(item.name)}`);
+                } else if (index === 3) {
+                    cell = createTextCell(cellValue, { fontSize: '14px' });
+                } else {
+                    cell = createTextCell(cellValue);
                 }
-                currentIndex = endIndex;
-                updateFooterAndButton();
+                if (index === 4) cell.classList.add('hide-column');
+                row.appendChild(cell);
+            });
+
+            return row;
+        }
+
+
+
+        function loadItems() {
+            const endIndex = Math.min(currentIndex + itemsPerPage, drawingDetails.length);
+            for (let i = currentIndex; i < endIndex; i++) {
+                tableBody.appendChild(createTableRow(drawingDetails[i]));
             }
+            currentIndex = endIndex;
+            updateFooterAndButton();
+        }
 
-            function updateFooterAndButton() {
-                footer.textContent = `${currentIndex} of ${drawingDetails.length}`;
-                loadMoreButton.style.display = currentIndex < drawingDetails.length ? 'block' : 'none';
-            }
+        function updateFooterAndButton() {
+            footer.textContent = `${currentIndex} of ${drawingDetails.length}`;
+            loadMoreButton.style.display = currentIndex < drawingDetails.length ? 'block' : 'none';
+        }
 
-            loadMoreButton.addEventListener('click', loadItems);
+        loadMoreButton.addEventListener('click', loadItems);
 
-            loadItems(); // Initial load
-        });
-    </script>
+        loadItems(); // Initial load
+    });
+</script>
 
 {% endblock %}

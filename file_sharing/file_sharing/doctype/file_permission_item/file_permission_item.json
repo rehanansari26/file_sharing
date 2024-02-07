@@ -156,7 +156,7 @@
    "label": "Open View log"
   },
   {
-   "depends_on": "docstatus == 1",
+   "default": "0",
    "fieldname": "views_seen",
    "fieldtype": "Int",
    "label": "Views Seen",
@@ -168,7 +168,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-07 09:44:55.736649",
+ "modified": "2024-02-07 12:31:10.455030",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",

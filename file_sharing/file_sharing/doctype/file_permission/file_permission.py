@@ -12,7 +12,7 @@ import re
 
 class FilePermission(Document):
 	def before_save(self):
-		isFileAlreadyShared(self)
+		#isFileAlreadyShared(self)
 		setStatusForFilesWithUrl(self, 'Draft')
 		fetchEmailToSend(self)
 		#fetch_and_append_files(self)
