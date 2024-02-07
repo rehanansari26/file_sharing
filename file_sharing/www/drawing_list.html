@@ -15,12 +15,12 @@
         <table id='shared-drawing-list'>
             <thead>
                 <tr>
+                    <th scope="col">ID</th>
                     <th scope="col">Item Code</th>
                     <th scope="col">Item Name</th>
                     <th scope="col">File</th>
                     <th scope="col">Validity</th>
                     <th scope="col" class="hide-column">Ref ID</th> <!-- Hidden Column -->
-                    <th scope="col">ID</th>
                 </tr>
             </thead>
             <tbody id="shared-drawing-detail"></tbody>
@@ -122,6 +122,84 @@
         background-color: #000000;
         color: #ffffff;
     }
+    /* Responsive adjustments for screens smaller than 600px */
+    @media (max-width: 600px) {
+        .main-div {
+            padding: 0 10px;
+        }
+
+        /* Set table layout to full width and remove borders for mobile */
+        table {
+            border: none;
+            margin-bottom: 0;
+        }
+
+        th, td {
+            display: block;
+            width: 100%;
+            box-sizing: border-box; /* Include padding in the width */
+        }
+
+        /* Hide the table header on small screens */
+        thead {
+            display: none;
+        }
+
+        tr {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0; /* Add separation between rows */
+        }
+
+        /* Style the table data for mobile */
+        td {
+            text-align: left; /* Align text to the left */
+            padding: 10px; /* Add padding for spacing */
+        }
+
+        /* Position the data label appropriately */
+        td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+            margin-right: 10px; /* Space between label and content */
+        }
+
+        /* Ensure the 'View' button takes up the full width */
+        .btn-style {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 10px 0; /* Add some margin around the button */
+        }
+
+        .hide-column {
+            display: none; /* Keep hidden columns hidden */
+        }
+
+        /* Adjust the 'Load More' button style for mobile */
+        #load-more {
+            width: 100%; /* Full width */
+            margin: 10px 0;
+        }
+        /* Alternate row background colors for better visual separation */
+        tr:nth-child(odd) {
+            background-color: #D3D3D3; /* Light gray for odd rows */
+        }
+
+        tr:nth-child(even) {
+            background-color: #ffffff; /* White for even rows */
+        }
+
+        /* Add borders to rows for clearer separation */
+        tr {
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        /* No border for the last row to avoid double borders */
+        tr:last-child {
+            border-bottom: none;
+        }
+    }
 
 </style>
 
@@ -158,10 +236,13 @@
             return cell;
         }
 
-        function createTextCell(text, style = {}) {
+        function createTextCell(text, style = {}, label = '') {
             const cell = document.createElement('td');
             cell.innerHTML = text;
             Object.assign(cell.style, style);
+            if (label !== '') {
+                cell.setAttribute('data-label', label);
+            }
             return cell;
         }
 
@@ -180,29 +261,31 @@
         function createTableRow(item) {
             const row = document.createElement('tr');
             const cellValues = [
-                item.child_file_reference ?? 'N/A',
-                item.item_name ?? 'N/A',
-                'View',
-                createViewText(item),
-                item.child_file_reference ?? 'N/A',
-                item.parent ?? 'N/A'
+                item.parent ?? 'N/A', // ID column moved to first
+                item.child_file_reference ?? 'N/A', // Item Code
+                item.item_name ?? 'N/A', // Item Name
+                'View', // File
+                createViewText(item), // Validity
+                item.child_file_reference ?? 'N/A' // Ref ID (Hidden Column)
             ];
 
             cellValues.forEach((cellValue, index) => {
                 let cell;
-                if (index === 2) {
+                if (index === 3) { // Adjusted index for 'View' link
                     cell = createLinkCell('View', `/drawing_viewer?query=${encodeURIComponent(item.name)}`);
-                } else if (index === 3) {
-                    cell = createTextCell(cellValue, { fontSize: '14px' });
+                } else if (index === 4) { // Adjusted index for 'Validity'
+                    cell = createTextCell(cellValue, { fontSize: '14px' }, 'Validity');
                 } else {
-                    cell = createTextCell(cellValue);
+                    const labels = ['ID', 'Item Code', 'Item Name', '', 'Validity', 'Ref ID'];
+                    cell = createTextCell(cellValue, {}, labels[index]);
                 }
-                if (index === 4) cell.classList.add('hide-column');
+                if (index === 5) cell.classList.add('hide-column'); // Adjusted index for hidden column
                 row.appendChild(cell);
             });
 
             return row;
         }
+
 
 
 

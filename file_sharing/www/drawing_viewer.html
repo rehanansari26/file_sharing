@@ -43,6 +43,26 @@ Drawing Viewer
             display: none !important;
         }
     }
+    /* Responsive adjustments for mobile devices */
+    @media (max-width: 600px) {
+        .canvascontainer {
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            height: auto;
+            padding: 10px;
+        }
+        #pdfCanvas {
+            max-height: none;
+        }
+        .expired-label {
+            font-size: 20px;
+            position: fixed; /* Fixed position to handle scrolling */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
 </style>
 {% endblock %}
 
