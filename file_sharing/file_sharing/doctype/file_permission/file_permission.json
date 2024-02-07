@@ -53,7 +53,7 @@
   {
    "fieldname": "files",
    "fieldtype": "Table",
-   "label": "Files",
+   "label": "files",
    "options": "File Permission Item"
   },
   {
@@ -83,8 +83,7 @@
    "fieldtype": "Link",
    "label": "File DocType",
    "options": "DocType",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "file_reference",
@@ -120,7 +119,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-06 13:33:32.144586",
+ "modified": "2024-02-07 09:40:32.480968",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission",

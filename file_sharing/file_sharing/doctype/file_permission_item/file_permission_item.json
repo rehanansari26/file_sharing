@@ -150,12 +150,13 @@
    "label": "Open File"
   },
   {
-   "depends_on": "views > 0",
+   "depends_on": "views_seen > 0",
    "fieldname": "open_view_log",
    "fieldtype": "Button",
    "label": "Open View log"
   },
   {
+   "depends_on": "docstatus == 1",
    "fieldname": "views_seen",
    "fieldtype": "Int",
    "label": "Views Seen",
@@ -167,7 +168,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-06 15:26:34.839430",
+ "modified": "2024-02-07 09:44:55.736649",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",

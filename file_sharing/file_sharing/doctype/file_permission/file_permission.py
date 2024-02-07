@@ -12,10 +12,10 @@ import re
 
 class FilePermission(Document):
 	def before_save(self):
-		check_duplicate_files(self)
+		isFileAlreadyShared(self)
 		setStatusForFilesWithUrl(self, 'Draft')
-		fetch_email_id(self)
-		fetch_and_append_files(self)
+		fetchEmailToSend(self)
+		#fetch_and_append_files(self)
 
 	def before_submit(self):
 		validate_files_before_sharing(self)
@@ -23,13 +23,11 @@ class FilePermission(Document):
 
 		if self.email_id and self.send_email == 1:
 			send_email_with_file_details(self)
-		
-		validate_sharing_settings(self)
 	
 	def before_cancel(self):
 		setStatusForFilesWithUrl(self, 'Cancelled')
 
-def check_duplicate_files(self):
+def isFileAlreadyShared(self):
 	active_shared_permissions = frappe.db.get_all(
 		'File Permission', 
 		{
@@ -67,35 +65,45 @@ def setStatusForFilesWithUrl(self, status):
 		if item.file_url:
 			item.child_status = status
 
-def fetch_email_id(self):
+def fetchEmailToSend(self):
 	if not self.user_doctype or not self.user_reference:
 		return
 	self.email_id = frappe.db.get_value(self.user_doctype, self.user_reference, 'email_id') or None
 
-def fetch_and_append_files(self):
-	if not self.file_doctype or not self.file_reference:
-		return
-	if not self.files: #clash with client side call
-		file_data = frappe.db.get_all('File', {'attached_to_doctype': self.file_doctype, 'attached_to_name': self.file_reference}, ['file_url', 'is_private'])
-		if not file_data:
-			self.files = []
-		existing_file_urls = [row.file_url for row in self.files]
-		for file in file_data:
-			if file.file_url not in existing_file_urls:
-				row = self.append('files', {})
-				row.child_file_reference = self.file_reference
-				row.file_url = file.file_url
-				row.is_private = file.is_private
-				row.child_status = 'Draft'
+# def fetch_and_append_files(self):
+# 	if not self.file_doctype or not self.file_reference:
+# 		return
+# 	if not self.files: #clash with client side call
+# 		file_data = frappe.db.get_all('File', {'attached_to_doctype': self.file_doctype, 'attached_to_name': self.file_reference}, ['file_url', 'is_private'])
+# 		if not file_data:
+# 			self.files = []
+# 		existing_file_urls = [row.file_url for row in self.files]
+# 		for file in file_data:
+# 			if file.file_url not in existing_file_urls:
+# 				row = self.append('files', {})
+# 				row.child_file_reference = self.file_reference
+# 				row.file_url = file.file_url
+# 				row.is_private = file.is_private
+# 				row.child_status = 'Draft'
 
 def validate_files_before_sharing(self):
 	if not self.user_reference:
-		frappe.throw('To share, we need you to enter the user reference first')
+		frappe.throw(f'To share, we need you to enter the {self.user_doctype} first')
+	
+	portal_user = frappe.db.get_value('Portal User', {'parent': self.user_reference, 'parenttype': self.user_doctype}, 'user')
+	if not portal_user:
+		frappe.throw(f"{self.user_doctype} are not registered as a portal user")
 		
 	if not self.files:
 		frappe.throw('To share, there must be a file in the files table. Please add a file before proceeding.')
 
 	for item in self.files:
+		if item.view_based_sharing == 1 and item.views_allowed == 0:
+			frappe.throw(f'Please specify the number of views allowed for row {item.idx} to enable sharing')
+
+		elif item.date_based_sharing == 1 and not item.to_date:
+			frappe.throw(f'Please specify the To Date for row {item.idx} to enable sharing')
+
 		if not frappe.db.count('File', {'file_url': item.file_url, 'attached_to_name': item.child_file_reference}) == 1:
 			frappe.msgprint(
 				'The file {1} has been attached multiple times to item {0}.'.format(
@@ -138,26 +146,29 @@ def is_valid_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_regex, email) is not None
 
-def validate_sharing_settings(self):
-	for item in self.files:
-		if item.view_based_sharing == 1 and item.views_allowed == 0:
-			frappe.throw(f'Please specify the number of views allowed for row {item.idx} to enable sharing')
-		elif item.date_based_sharing == 1 and not item.from_date and not item.to_date:
-			frappe.throw(f'Please specify the To Date for row {item.idx} to enable sharing')
-
 def auto_expire_drawings_by_date():
-	sharedDrawingsToExpire = frappe.db.get_all('File Permission Item', {'status': 'Shared', 'to_date': ['<', frappe.utils.nowdate()]}, pluck='name')
+	sharedDrawingsToExpire = frappe.db.get_all('File Permission Item', {'date_based_sharing': 1, 'status': 'Shared', 'to_date': ['<', frappe.utils.nowdate()], 'docstatus': 1}, pluck='name')
 	if not sharedDrawingsToExpire:
 		return
 	frappe.db.set_value('File Permission Item', sharedDrawingsToExpire, 'child_status', 'Expired')
+	sharedParentList = frappe.db.get_all('File Permission', {'status': 'Shared', 'docstatus': 1})
+	if not sharedParentList:
+		return
+	for fs in sharedParentList:
+		child_status_list = frappe.db.get_all('File Permission Item', {'parent': fs.name}, ['child_status'], pluck='child_status')
+		result = all(map(lambda x: x == 'Expired', child_status_list))
+		if result:
+			frappe.db.set_value('File Permission', fs.name, 'status', 'Expired')
 
+#JS
 @frappe.whitelist()
 def get_unique_file_urls_for_document(file_doctype, file_reference):
 	file_data = frappe.db.get_all('File',{'attached_to_doctype': file_doctype, 'attached_to_name': file_reference},['file_url', 'is_private'], group_by='file_url')	
 	if not file_data:
 		return None
 	return file_data
-	
+
+#Web Page	
 @frappe.whitelist()
 def log_view_if_not_expired(reference_name):
 	status, FP = frappe.db.get_value('File Permission Item', reference_name, ['child_status', 'parent'])

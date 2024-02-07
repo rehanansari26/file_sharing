@@ -7,29 +7,35 @@ from frappe.model.document import Document
 
 class FileViewLog(Document):
 	def after_insert(self):
-		if self.reference_document == "Drawing Permission":
+		if self.reference_document == "File Permission":
 
-			views_allowed, current_views, view_based_sharing = frappe.db.get_value(
-				'Drawing Permission Item', 
-				self.child_reference_name, 
-				['views_allowed', 'views', 'view_based_sharing']
+			views_allowed, views_seen, view_based_sharing = frappe.db.get_value(
+				'File Permission Item', 
+				self.child_reference_name,
+				['views_allowed', 'views_seen', 'view_based_sharing']
 			)
 
 			# if not view_based_sharing:
 			# 	return
 
 			#case 1 view_based_sharing
-			new_views = current_views + 1
+			new_views = views_seen + 1
 			
 			if new_views == views_allowed:
-				frappe.db.set_value('Drawing Permission Item', self.child_reference_name, 'views', new_views)
-				frappe.db.set_value('Drawing Permission Item', self.child_reference_name, 'child_status', 'Expired')
-				status_list = frappe.db.get_all('Drawing Permission Item', {'parent': self.reference_name}, ['child_status'], group_by='child_status')
-
-				if len(status_list) == 1 and status_list[0]['child_status'] == 'Expired':
-    				# Your code for the 'Expired' condition
-					frappe.db.set_value('Drawing Permission', self.reference_name, 'status', 'Expired')
+				frappe.db.set_value('File Permission Item', self.child_reference_name, 
+					{
+    					'views_seen': new_views,
+    					'child_status': 'Expired'
+					}
+				)
+				child_status_list = frappe.db.get_all('File Permission Item', {'parent': self.reference_name}, ['child_status'], pluck='child_status')
+				result = all(map(lambda x: x == 'Expired', child_status_list))
+				if result:
+					frappe.db.set_value('File Permission', self.reference_name, 'status', 'Expired')
+					
 			elif not views_allowed or new_views < views_allowed:
-				frappe.db.set_value('Drawing Permission Item', self.child_reference_name, 'views', new_views)
+				frappe.db.set_value('File Permission Item', self.child_reference_name, 'views_seen', new_views)
 
 			#case 2 date_based_sharing
+
+			#schedular
