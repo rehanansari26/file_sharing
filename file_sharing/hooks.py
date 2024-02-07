@@ -138,7 +138,7 @@ scheduler_events = {
 	# 	"file_sharing.tasks.all"
 	# ],
 	"daily": [
-		"file_sharing.file_sharing.doctype.drawing_permission.drawing_permission.auto_expire_drawings_by_date"
+		"file_sharing.file_sharing.doctype.file_permission.file_permission.auto_expire_drawings_by_date"
 	],
 	# "hourly": [
 	# 	"file_sharing.tasks.hourly"
