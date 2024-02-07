@@ -12,10 +12,10 @@ import re
 
 class FilePermission(Document):
 	def before_save(self):
-		#isFileAlreadyShared(self)
+		isFileAlreadyShared(self)
 		setStatusForFilesWithUrl(self, 'Draft')
 		fetchEmailToSend(self)
-		#fetch_and_append_files(self)
+		# fetch_and_append_files(self)
 
 	def before_submit(self):
 		validate_files_before_sharing(self)
@@ -146,6 +146,7 @@ def is_valid_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_regex, email) is not None
 
+#Schedular
 def auto_expire_drawings_by_date():
 	sharedDrawingsToExpire = frappe.db.get_all('File Permission Item', {'date_based_sharing': 1, 'status': 'Shared', 'to_date': ['<', frappe.utils.nowdate()], 'docstatus': 1}, pluck='name')
 	if not sharedDrawingsToExpire:
