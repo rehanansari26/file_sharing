@@ -81,7 +81,7 @@ def fetchEmailToSend(self):
 # 		for file in file_data:
 # 			if file.file_url not in existing_file_urls:
 # 				row = self.append('files', {})
-# 				row.child_file_reference = self.file_reference
+# 				row.c_file_reference = self.file_reference
 # 				row.file_url = file.file_url
 # 				row.is_private = file.is_private
 # 				row.child_status = 'Draft'
@@ -104,10 +104,10 @@ def validate_files_before_sharing(self):
 		elif item.date_based_sharing == 1 and not item.to_date:
 			frappe.throw(f'Please specify the To Date for row {item.idx} to enable sharing')
 
-		if not frappe.db.count('File', {'file_url': item.file_url, 'attached_to_name': item.child_file_reference}) == 1:
+		if not frappe.db.count('File', {'file_url': item.file_url, 'attached_to_name': item.c_file_reference, 'file_type': ['in', ['PDF', 'GLB']]}) == 1:
 			frappe.msgprint(
 				'The file {1} has been attached multiple times to item {0}.'.format(
-					frappe.bold(item.child_file_reference), frappe.bold(item.file_url)
+					frappe.bold(item.c_file_reference), frappe.bold(item.file_url)
 				),
 				title='Duplicate File Warning',
 				indicator='red'
@@ -163,7 +163,7 @@ def auto_expire_drawings_by_date():
 #JS
 @frappe.whitelist()
 def get_unique_file_urls_for_document(file_doctype, file_reference):
-	file_data = frappe.db.get_all('File',{'attached_to_doctype': file_doctype, 'attached_to_name': file_reference},['file_url', 'is_private'], group_by='file_url')	
+	file_data = frappe.db.get_all('File',{'attached_to_doctype': file_doctype, 'attached_to_name': file_reference, 'file_type': ['in', ['PDF', 'GLB']]},['file_url', 'is_private'], group_by='file_url')	
 	if not file_data:
 		return None
 	return file_data

@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "file_info_section",
-  "child_file_reference",
+  "c_file_reference",
   "file_url",
   "open_file",
   "column_break_bbem",
@@ -123,14 +123,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "file_url",
-   "fieldname": "child_file_reference",
-   "fieldtype": "Link",
-   "label": "File Reference",
-   "options": "Item",
-   "read_only": 1
-  },
-  {
    "fieldname": "views_allowed",
    "fieldtype": "Int",
    "label": "Views Allowed",
@@ -161,12 +153,17 @@
    "fieldtype": "Int",
    "label": "Views",
    "non_negative": 1
+  },
+  {
+   "fieldname": "c_file_reference",
+   "fieldtype": "Data",
+   "label": "File Reference"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-07 13:55:04.557799",
+ "modified": "2024-02-07 15:00:29.354169",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",

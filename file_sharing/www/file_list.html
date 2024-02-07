@@ -12,7 +12,7 @@
     </div>
 
     <div class="main-div">
-        <table id='shared-drawing-list'>
+        <table id='shared-file-list'>
             <thead>
                 <tr>
                     <th scope="col">ID</th>
@@ -23,7 +23,7 @@
                     <th scope="col" class="hide-column">Ref ID</th> <!-- Hidden Column -->
                 </tr>
             </thead>
-            <tbody id="shared-drawing-detail"></tbody>
+            <tbody id="shared-file-detail"></tbody>
             <tfoot>
                 <tr>
                     <td colspan="6">0 of 0</td>
@@ -74,11 +74,11 @@
     th {
         background-color: #f5f5f5;
     }
-    #shared-drawing-list th {
+    #shared-file-list th {
         width: 200px;
     }
-    #shared-drawing-list th:nth-child(3),
-    #shared-drawing-list th:nth-child(4) {
+    #shared-file-list th:nth-child(3),
+    #shared-file-list th:nth-child(4) {
         width: 150px;
     }
     th, td {
@@ -218,8 +218,8 @@
         
         document.getElementById('dynamic-greeting').textContent = `${greeting}, {{ supplier or 'Valued Supplier' }}`;
 
-        const drawingDetails = JSON.parse('{{ drawing_permission_details | tojson | safe }}');
-        const tableBody = document.getElementById('shared-drawing-detail');
+        const fileDetails = JSON.parse('{{ file_permission_details | tojson | safe }}');
+        const tableBody = document.getElementById('shared-file-detail');
         const loadMoreButton = document.getElementById('load-more');
         const footer = document.querySelector('tfoot td');
         let currentIndex = 0;
@@ -249,9 +249,9 @@
         function createViewText(item) {
             if (item.date_based_sharing && item.view_based_sharing) {
                 const viewsLeft = item.views_allowed - item.views;
-                return `${viewsLeft} Views <br>Till: 12-June-2023`;
+                return `${viewsLeft} Views <br>Till: ${item.to_date}`;
             } else if (item.date_based_sharing == 1 && item.view_based_sharing == 0) {
-                return 'Unlimited <br>Till: 12-June-2023';
+                return `Unlimited <br>Till: ${item.to_date}`
             } else if (item.date_based_sharing == 0 && item.view_based_sharing == 1) {
                 return `${item.views_allowed - item.views} Views Left`;
             }
@@ -262,17 +262,17 @@
             const row = document.createElement('tr');
             const cellValues = [
                 item.parent ?? 'N/A', // ID column moved to first
-                item.child_file_reference ?? 'N/A', // Item Code
+                item.c_file_reference ?? 'N/A', // Item Code
                 item.item_name ?? 'N/A', // Item Name
                 'View', // File
                 createViewText(item), // Validity
-                item.child_file_reference ?? 'N/A' // Ref ID (Hidden Column)
+                item.c_file_reference ?? 'N/A' // Ref ID (Hidden Column)
             ];
 
             cellValues.forEach((cellValue, index) => {
                 let cell;
                 if (index === 3) { // Adjusted index for 'View' link
-                    cell = createLinkCell('View', `/drawing_viewer?query=${encodeURIComponent(item.name)}`);
+                    cell = createLinkCell('View', `/file_viewer?query=${encodeURIComponent(item.name)}`);
                 } else if (index === 4) { // Adjusted index for 'Validity'
                     cell = createTextCell(cellValue, { fontSize: '14px' }, 'Validity');
                 } else {
@@ -290,17 +290,17 @@
 
 
         function loadItems() {
-            const endIndex = Math.min(currentIndex + itemsPerPage, drawingDetails.length);
+            const endIndex = Math.min(currentIndex + itemsPerPage, fileDetails.length);
             for (let i = currentIndex; i < endIndex; i++) {
-                tableBody.appendChild(createTableRow(drawingDetails[i]));
+                tableBody.appendChild(createTableRow(fileDetails[i]));
             }
             currentIndex = endIndex;
             updateFooterAndButton();
         }
 
         function updateFooterAndButton() {
-            footer.textContent = `${currentIndex} of ${drawingDetails.length}`;
-            loadMoreButton.style.display = currentIndex < drawingDetails.length ? 'block' : 'none';
+            footer.textContent = `${currentIndex} of ${fileDetails.length}`;
+            loadMoreButton.style.display = currentIndex < fileDetails.length ? 'block' : 'none';
         }
 
         loadMoreButton.addEventListener('click', loadItems);

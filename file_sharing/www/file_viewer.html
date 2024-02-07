@@ -70,12 +70,12 @@ Drawing Viewer
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.min.js"></script>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 <script type="module">
-    const filePath = "{{ file_url }}";
-    const drawingStatus = "{{ child_status }}";
+    const filePath = "{{ file_url }}"
+    const fileStatus = "{{ child_status }}"
     const supplierName = "{{ supplier_name }}"
-    const allowDownload = parseInt("{{ allow_download }}", 10);
+    const allowDownload = parseInt("{{ allow_download }}", 10)
     
-    if (drawingStatus !== 'Expired') {
+    if (fileStatus !== 'Expired') {
         if (filePath.endsWith('.pdf')) {
             renderPDFDocument();
             disableRightClick();
@@ -86,7 +86,7 @@ Drawing Viewer
             logDrawingView();
         }
     } else {
-        showExpiredLabel();
+        showExpiredLabel()
     }
 
     function renderModel(modelPath) {
