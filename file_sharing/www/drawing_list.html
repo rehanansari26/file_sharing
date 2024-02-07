@@ -248,12 +248,12 @@
 
         function createViewText(item) {
             if (item.date_based_sharing && item.view_based_sharing) {
-                const viewsLeft = item.views_allowed - (item.views_seen ?? 0);
+                const viewsLeft = item.views_allowed - item.views;
                 return `${viewsLeft} Views <br>Till: 12-June-2023`;
             } else if (item.date_based_sharing == 1 && item.view_based_sharing == 0) {
                 return 'Unlimited <br>Till: 12-June-2023';
             } else if (item.date_based_sharing == 0 && item.view_based_sharing == 1) {
-                return `${item.views_allowed - (item.views_seen ?? 0)} Views Left`;
+                return `${item.views_allowed - item.views} Views Left`;
             }
             return 'Unlimited';
         }

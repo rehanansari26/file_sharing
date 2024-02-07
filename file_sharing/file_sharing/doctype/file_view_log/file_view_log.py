@@ -12,7 +12,7 @@ class FileViewLog(Document):
 			views_allowed, views_seen, view_based_sharing = frappe.db.get_value(
 				'File Permission Item', 
 				self.child_reference_name,
-				['views_allowed', 'views_seen', 'view_based_sharing']
+				['views_allowed', 'views', 'view_based_sharing']
 			)
 
 			# if not view_based_sharing:
@@ -24,7 +24,7 @@ class FileViewLog(Document):
 			if new_views == views_allowed:
 				frappe.db.set_value('File Permission Item', self.child_reference_name, 
 					{
-    					'views_seen': new_views,
+    					'views': new_views,
     					'child_status': 'Expired'
 					}
 				)
@@ -32,9 +32,9 @@ class FileViewLog(Document):
 				result = all(map(lambda x: x == 'Expired', child_status_list))
 				if result:
 					frappe.db.set_value('File Permission', self.reference_name, 'status', 'Expired')
-					
+
 			elif not views_allowed or new_views < views_allowed:
-				frappe.db.set_value('File Permission Item', self.child_reference_name, 'views_seen', new_views)
+				frappe.db.set_value('File Permission Item', self.child_reference_name, 'views', new_views)
 
 			#case 2 date_based_sharing
 

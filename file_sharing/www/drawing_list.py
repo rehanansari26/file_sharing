@@ -19,4 +19,4 @@ def get_context(context):
     if not context.drawing_permissions:
         frappe.throw("No drawings have been shared with you.", frappe.PermissionError)
 
-    context.drawing_permission_details = frappe.db.get_all('File Permission Item',{'parent': ['in', context.drawing_permissions], 'child_status': 'Shared'},['name', 'child_file_reference', 'child_file_reference.item_name as item_name', 'file_url', 'views_seen', 'views_allowed', 'date_based_sharing', 'view_based_sharing', 'parent'])
+    context.drawing_permission_details = frappe.db.get_all('File Permission Item',{'parent': ['in', context.drawing_permissions], 'child_status': 'Shared'},['name', 'child_file_reference', 'child_file_reference.item_name as item_name', 'file_url', 'views_allowed', 'views', 'date_based_sharing', 'view_based_sharing', 'parent'])

@@ -17,7 +17,7 @@
   "allow_download",
   "is_private",
   "views_section",
-  "views_seen",
+  "views",
   "open_view_log",
   "column_break_rkcp",
   "views_allowed",
@@ -157,18 +157,16 @@
   },
   {
    "default": "0",
-   "fieldname": "views_seen",
+   "fieldname": "views",
    "fieldtype": "Int",
-   "label": "Views Seen",
-   "no_copy": 1,
-   "non_negative": 1,
-   "read_only": 1
+   "label": "Views",
+   "non_negative": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-07 12:31:10.455030",
+ "modified": "2024-02-07 13:55:04.557799",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",

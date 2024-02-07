@@ -27,7 +27,7 @@ frappe.ui.form.on('File Permission', {
                 var toDate = new Date(file.to_date);
                 var currentDate = new Date(frappe.datetime.get_today());
                 if (file.view_based_sharing == 1 && file.date_based_sharing == 1 && toDate > currentDate && file.views_allowed > 0 && file.child_status == 'Shared') {
-                    var views_remaining = file.views_allowed - file.views_seen;
+                    var views_remaining = file.views_allowed - file.views;
                     var timeDiff = toDate.getTime() - currentDate.getTime();
                     var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
         
@@ -40,7 +40,7 @@ frappe.ui.form.on('File Permission', {
                     messages.push(`'${file.file_url}': ${diffDays} day(s) remaining`);
 
                 } else if (file.view_based_sharing == 1 && file.child_status == 'Shared' && file.views_allowed > 0) {
-                    var views_remaining = file.views_allowed - file.views_seen;
+                    var views_remaining = file.views_allowed - file.views;
                     messages.push(`'${file.file_url}': ${views_remaining} view(s) left`);
 
                 }
