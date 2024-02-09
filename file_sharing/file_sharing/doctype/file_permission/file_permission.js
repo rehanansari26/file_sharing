@@ -123,7 +123,7 @@ frappe.ui.form.on('File Permission', {
 						frm.set_value('files', [])
 						frappe.msgprint({
 							title: __('File Not Found'),
-							message: __(`No files available for file reference <b>${frm.doc.file_reference}</b>. Please verify the file reference or upload files.`),
+							message: __(`No files available for ${frm.doc.file_doctype} <b>${frm.doc.file_reference}</b>. Please verify the ${frm.doc.file_doctype} or upload files.`),
 							indicator: 'orange'
 						});
 					}
