@@ -47,8 +47,7 @@
   },
   {
    "fieldname": "section_break_rpgn",
-   "fieldtype": "Section Break",
-   "label": "Files"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "files",
@@ -75,7 +74,7 @@
   {
    "fieldname": "details_section",
    "fieldtype": "Section Break",
-   "label": "Access Details"
+   "label": "Details"
   },
   {
    "default": "Item",
@@ -119,7 +118,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-07 09:40:32.480968",
+ "modified": "2024-02-09 15:09:54.742668",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission",
