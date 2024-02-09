@@ -30,7 +30,7 @@ class FilePermission(Document):
 
 def getFileRefName(self):
 	if self.file_reference and self.file_doctype:
-		self.file_reference_name = frappe.db.get_value(self.file_doctype, self.file_reference, 'item_name')
+		self.file_reference_name = frappe.db.get_value(self.file_doctype, self.file_reference, 'item_name') or None
 
 def isFileAlreadyShared(self):
 	active_shared_permissions = frappe.db.get_all(
