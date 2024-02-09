@@ -12,6 +12,7 @@ import re
 
 class FilePermission(Document):
 	def before_save(self):
+		getFileRefName(self)
 		isFileAlreadyShared(self)
 		setStatusForFilesWithUrl(self, 'Draft')
 		fetchEmailToSend(self)
@@ -26,6 +27,10 @@ class FilePermission(Document):
 	
 	def before_cancel(self):
 		setStatusForFilesWithUrl(self, 'Cancelled')
+
+def getFileRefName(self):
+	if self.file_reference and self.file_doctype:
+		self.file_reference_name = frappe.db.get_value(self.file_doctype, self.file_reference, 'item_name')
 
 def isFileAlreadyShared(self):
 	active_shared_permissions = frappe.db.get_all(
