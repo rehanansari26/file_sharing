@@ -8,7 +8,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 import math
-import re
 
 class FilePermission(Document):
 	def before_save(self):
@@ -16,7 +15,6 @@ class FilePermission(Document):
 		isFileAlreadyShared(self)
 		setStatusForFilesWithUrl(self, 'Draft')
 		fetchEmailToSend(self)
-		# fetch_and_append_files(self)
 
 	def before_submit(self):
 		validate_files_before_sharing(self)
@@ -29,7 +27,7 @@ class FilePermission(Document):
 		setStatusForFilesWithUrl(self, 'Cancelled')
 
 def getFileRefName(self):
-	if self.file_reference and self.file_doctype:
+	if self.file_doctype and self.file_reference:
 		self.file_reference_name = frappe.db.get_value(self.file_doctype, self.file_reference, 'item_name') or None
 
 def isFileAlreadyShared(self):
@@ -106,45 +104,37 @@ def validate_files_before_sharing(self):
 		if item.view_based_sharing == 1 and item.views_allowed == 0:
 			frappe.throw(f'Please specify the number of views allowed for row {item.idx} to enable sharing')
 
-		elif item.date_based_sharing == 1 and not item.to_date:
-			frappe.throw(f'Please specify the To Date for row {item.idx} to enable sharing')
+		elif item.date_based_sharing == 1 and not item.set_expiration_date:
+			frappe.throw(f'Please specify the expiration date for row {item.idx} to enable sharing')
 
-		if not frappe.db.count('File', {'file_url': item.file_url, 'attached_to_name': item.c_file_reference, 'file_type': ['in', ['PDF', 'GLB']]}) == 1:
-			frappe.msgprint(
-				'The file {1} has been attached multiple times to item {0}.'.format(
-					frappe.bold(item.c_file_reference), frappe.bold(item.file_url)
-				),
-				title='Duplicate File Warning',
-				indicator='red'
-			)
+		# if not frappe.db.count('File', {'file_url': item.file_url, 'attached_to_name': item.c_file_reference, 'file_type': ['in', ['PDF', 'GLB']]}) == 1:
+		# 	frappe.msgprint(
+		# 		'The file {1} has been attached multiple times to item {0}.'.format(
+		# 			frappe.bold(item.c_file_reference), frappe.bold(item.file_url)
+		# 		),
+		# 		title='Duplicate File Warning',
+		# 		indicator='red'
+		# 	)
 
 def send_email_with_file_details(self):
     item_details = []
     for item in self.files:
         details = f"File: {item.file_url}"
-
-        # Check if both date-based and view-based sharing are enabled
+        valid_to = formatdate(item.set_expiration_date)
         if item.date_based_sharing == 1 and item.view_based_sharing == 1:
-            valid_from = formatdate(item.from_date)
-            valid_to = formatdate(item.to_date)
-            details += f", {item.views_allowed} views valid from {valid_from} to {valid_to}"
+            details += f", {item.views_allowed} views valid till {valid_to}"
         elif item.date_based_sharing == 1:
-            # Only date-based sharing is enabled
-            valid_from = formatdate(item.from_date)
-            valid_to = formatdate(item.to_date)
-            details += f", valid from {valid_from} to {valid_to}"
+            details += f", valid till {valid_to}"
         elif item.view_based_sharing == 1:
-            # Only view-based sharing is enabled
             details += f", valid for {item.views_allowed} views"
         else:
-            # Neither condition is true, indicate unlimited availability
             details += ", available unlimited times"
 
         item_details.append(details)
 
     message = f"Dear Supplier,<br><br>The following files have been shared with you:<br><br>"
     message += "<br>".join(item_details)
-    message += f"<br><br>To view these shared files, please <a href='https://${frappe.utils.get_url()}'>visit the supplier portal</a>.<br><br>Regards,<br>ERP Team"
+    message += f"<br><br>To view these shared files, please <a href='https://{frappe.utils.get_url()}'>visit the supplier portal</a>.<br><br>Regards,<br>ERP Team"
 
     subject = f"Files Shared for {self.file_reference}"
 
@@ -156,57 +146,86 @@ def send_email_with_file_details(self):
 
 #Schedular
 def auto_expire_drawings_by_date():
-	sharedDrawingsToExpire = frappe.db.get_all('File Permission Item', {'date_based_sharing': 1, 'status': 'Shared', 'to_date': ['<', frappe.utils.nowdate()], 'docstatus': 1}, pluck='name')
-	if not sharedDrawingsToExpire:
-		return
-	frappe.db.set_value('File Permission Item', sharedDrawingsToExpire, 'child_status', 'Expired')
-	sharedParentList = frappe.db.get_all('File Permission', {'status': 'Shared', 'docstatus': 1})
-	if not sharedParentList:
-		return
-	for fs in sharedParentList:
-		child_status_list = frappe.db.get_all('File Permission Item', {'parent': fs.name}, ['child_status'], pluck='child_status')
-		result = all(map(lambda x: x == 'Expired', child_status_list))
-		if result:
-			frappe.db.set_value('File Permission', fs.name, 'status', 'Expired')
+    sharedDrawingsToExpire = frappe.db.get_all(
+        'File Permission Item', 
+        {
+            'date_based_sharing': 1, 
+            'child_status': 'Shared',
+            'set_expiration_date': ['<', frappe.utils.nowdate()],
+            'docstatus': 1
+        }, 
+        pluck='name'
+    )
+
+    if not sharedDrawingsToExpire:
+        return
+
+    frappe.db.set_value(
+        'File Permission Item', 
+        sharedDrawingsToExpire, 
+        'child_status', 
+        'Expired'
+    )
+
+    sharedParentList = frappe.db.get_all(
+        'File Permission', 
+        {
+            'status': 'Shared', 
+            'docstatus': 1
+        }
+    )
+
+    if not sharedParentList:
+        return
+
+    for fs in sharedParentList:
+        child_status_list = frappe.db.get_all(
+            'File Permission Item', 
+            {'parent': fs.name}, 
+            ['child_status'], 
+            pluck='child_status'
+        )
+        result = all(map(lambda x: x == 'Expired', child_status_list))
+        if result:
+            frappe.db.set_value(
+                'File Permission', 
+                fs.name, 
+                'status', 
+                'Expired'
+            )
 
 #JS
 @frappe.whitelist()
 def get_unique_file_urls_for_document(file_doctype, file_reference):
-    allow_public_files = frappe.db.get_single_value('File Settings', 'allow_public_files')
+	allow_public_files = frappe.db.get_single_value('File Settings', 'allow_public_files')
 
-    # Determine the filter based on 'allow_public_files' setting
-    if allow_public_files:
-        is_private_filter = {'is_private': ['in', [0, 1]]}
-    else:
-        is_private_filter = {'is_private': 1}
+	if allow_public_files:
+		is_private_filter = {'is_private': ['in', [0, 1]]}
+	else:
+		is_private_filter = {'is_private': 1}
 
-    # Construct the query filters
-    filters = {
-        **is_private_filter,
-        'attached_to_doctype': file_doctype,
-        'attached_to_name': file_reference,
-        'file_type': ['in', ['PDF', 'GLB']]
+	filters = {
+		**is_private_filter,
+		'attached_to_doctype': file_doctype,
+		'attached_to_name': file_reference,
+		'file_type': ['in', ['PDF', 'GLB']]
     }
 
-    # Query the database
-    file_data = frappe.db.get_all(
-        'File',
-        filters,
-        ['file_url', 'is_private']
-    )
+	file_data = frappe.db.get_all(
+		'File',
+		filters,
+		['file_url', 'is_private']
+	)
+	if not file_data:
+		return None
+	unique_files = {}
+	for file in file_data:
+		file_name = file['file_url'].split('/')[-1]
+		if file_name not in unique_files or file['is_private']:
+			unique_files[file_name] = file
+	return list(unique_files.values())
 
-    if not file_data:
-        return None
-
-    unique_files = {}
-    for file in file_data:
-        file_name = file['file_url'].split('/')[-1]
-        if file_name not in unique_files or file['is_private']:
-            unique_files[file_name] = file
-
-    return list(unique_files.values())
-	
-#Web Page	
+#Web Page
 @frappe.whitelist()
 def log_view_if_not_expired(reference_name):
 	status, FP = frappe.db.get_value('File Permission Item', reference_name, ['child_status', 'parent'])
@@ -220,15 +239,14 @@ def log_view_if_not_expired(reference_name):
         	}).insert(ignore_permissions=True,ignore_mandatory=True)
 		doc.save()
 
-@frappe.whitelist()	
+@frappe.whitelist()
 def get_watermarked_pdf(file_url, supplier_name, is_private):
     status = 'private' if int(is_private) == 1 else 'public'
-    # Replace this with your actual file path retrieval
-    input_pdf = PdfReader(frappe.get_site_path(status, 'files', file_url.split('/')[-1]))  # file_url should be the local path to the PDF file
+    input_pdf = PdfReader(frappe.get_site_path(status, 'files', file_url.split('/')[-1]))
     watermark_text = supplier_name
-    watermark_opacity = 0.1  # Reduced opacity for better readability of the original content
+    watermark_opacity = 0.1
     watermark_angle = 45
-    watermark_font_size = 18  # Adjust as needed
+    watermark_font_size = 18
 
     output_pdf = PdfWriter()
 
@@ -236,35 +254,28 @@ def get_watermarked_pdf(file_url, supplier_name, is_private):
         page_width = page.mediabox[2]
         page_height = page.mediabox[3]
 
-        # Create a watermark canvas that matches the size of the current page
         watermark = BytesIO()
         c = canvas.Canvas(watermark, pagesize=(page_width, page_height))
 
-        # Increase the step size to add more space between watermarks
-        step_size = max(watermark_font_size * 4, 100)  # Adjust as needed
+        step_size = max(watermark_font_size * 4, 100)
         num_watermarks_x = int(page_width / step_size) + 2
         num_watermarks_y = int(page_height / step_size) + 2
 
-        # Loop to cover the page diagonally with watermarks
         for x in range(num_watermarks_x):
             for y in range(num_watermarks_y):
                 c.saveState()
-                # Translate to the position where the watermark will be drawn
                 c.translate((x - 1) * step_size, (y - 1) * step_size)
                 c.rotate(watermark_angle)
                 c.setFillColorRGB(0, 0, 0, watermark_opacity)
                 c.setFont("Helvetica", watermark_font_size)
-                # Draw the watermark text
                 c.drawString(0, 0, watermark_text)
                 c.restoreState()
-
         c.save()
         watermark.seek(0)
 
         watermark_reader = PdfReader(watermark)
         watermark_page = watermark_reader.pages[0]
 
-        # Merge the watermark page with the current page
         page.merge_page(watermark_page)
         output_pdf.add_page(page)
 
