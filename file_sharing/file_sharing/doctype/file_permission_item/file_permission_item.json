@@ -38,6 +38,7 @@
   },
   {
    "columns": 1,
+   "default": "Draft",
    "fieldname": "child_status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -162,7 +163,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-09 15:23:18.132255",
+ "modified": "2024-02-10 10:47:37.279095",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",
