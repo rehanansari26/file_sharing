@@ -157,13 +157,14 @@
   {
    "fieldname": "c_file_reference",
    "fieldtype": "Data",
-   "label": "File Reference"
+   "label": "File Reference",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-10 10:47:37.279095",
+ "modified": "2024-02-10 10:52:57.016976",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",
