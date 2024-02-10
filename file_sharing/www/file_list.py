@@ -46,7 +46,7 @@ def get_context(context):
             'file_url', 
             'views_allowed', 
             'views', 
-            'to_date', 
+            'set_expiration_date', 
             'date_based_sharing', 
             'view_based_sharing', 
             'parent'
@@ -54,8 +54,8 @@ def get_context(context):
     )
 
     for item in file_permission_details:
-        if item.get('to_date'):
-            item['to_date'] = formatdate(item['to_date'])
+        if item.get('set_expiration_date'):
+            item['set_expiration_date'] = formatdate(item['set_expiration_date'])
         #File DocType = 'Item'
         item['item_name'] = frappe.db.get_value('Item', item.get('c_file_reference'), 'item_name')
 

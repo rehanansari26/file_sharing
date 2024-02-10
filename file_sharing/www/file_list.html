@@ -249,9 +249,9 @@
         function createViewText(item) {
             if (item.date_based_sharing && item.view_based_sharing) {
                 const viewsLeft = item.views_allowed - item.views;
-                return `${viewsLeft} Views <br>Till: ${item.to_date}`;
+                return `${viewsLeft} Views <br>Till: ${item.set_expiration_date}`;
             } else if (item.date_based_sharing == 1 && item.view_based_sharing == 0) {
-                return `Unlimited <br>Till: ${item.to_date}`
+                return `Unlimited Views<br>Till: ${item.set_expiration_date}`
             } else if (item.date_based_sharing == 0 && item.view_based_sharing == 1) {
                 return `${item.views_allowed - item.views} Views Left`;
             }
