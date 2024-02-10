@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-02-10 11:09:37.404073",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "allow_public_files"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "allow_public_files",
+   "fieldtype": "Check",
+   "label": "Allow Public Files"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-02-10 11:10:42.614010",
+ "modified_by": "Administrator",
+ "module": "File Sharing",
+ "name": "File Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
