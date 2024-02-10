@@ -104,7 +104,8 @@
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "label": "User Reference",
-   "options": "user_doctype"
+   "options": "user_doctype",
+   "reqd": 1
   },
   {
    "fetch_from": "item_code.item_name",
@@ -118,7 +119,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-10 10:49:50.918155",
+ "modified": "2024-02-10 12:17:44.468776",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission",

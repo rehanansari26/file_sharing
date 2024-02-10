@@ -14,29 +14,33 @@
   {
    "fieldname": "viewed_by",
    "fieldtype": "Data",
-   "label": "Viewed By"
+   "label": "Viewed By",
+   "read_only": 1
   },
   {
    "fieldname": "reference_document",
    "fieldtype": "Link",
    "label": "Reference Document",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference name",
-   "options": "reference_document"
+   "options": "reference_document",
+   "read_only": 1
   },
   {
    "fieldname": "child_reference_name",
    "fieldtype": "Data",
-   "label": "Child Reference name"
+   "label": "Child Reference name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-29 21:39:11.533151",
+ "modified": "2024-02-10 12:32:20.902597",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File View Log",

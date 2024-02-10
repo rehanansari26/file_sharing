@@ -151,6 +151,6 @@ frappe.ui.form.on('File Permission Item', {
     open_view_log: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
         let baseUrl = window.location.origin;
-		window.location.href = `${baseUrl}/app/drawing-view-log?child_reference_name=${d.name}`
+		window.location.href = `${baseUrl}/app/file-view-log?child_reference_name=${d.name}`
 	}
 })
