@@ -22,9 +22,8 @@
   "column_break_rkcp",
   "views_allowed",
   "date_section",
-  "from_date",
-  "column_break_iull",
-  "to_date"
+  "set_expiration_date",
+  "column_break_iull"
  ],
  "fields": [
   {
@@ -91,23 +90,8 @@
    "label": "Date"
   },
   {
-   "default": "Today",
-   "fieldname": "from_date",
-   "fieldtype": "Date",
-   "label": "From Date",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_iull",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "to_date",
-   "fieldtype": "Date",
-   "label": "To Date",
-   "mandatory_depends_on": "date_based_sharing",
-   "no_copy": 1
   },
   {
    "default": "0",
@@ -159,12 +143,17 @@
    "fieldtype": "Data",
    "label": "File Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "set_expiration_date",
+   "fieldtype": "Date",
+   "label": "set expiration date"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-10 10:52:57.016976",
+ "modified": "2024-02-10 11:51:11.146885",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",

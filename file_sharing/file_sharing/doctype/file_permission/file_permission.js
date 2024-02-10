@@ -152,12 +152,5 @@ frappe.ui.form.on('File Permission Item', {
 		var d = locals[cdt][cdn];
         let baseUrl = window.location.origin;
 		window.location.href = `${baseUrl}/app/drawing-view-log?child_reference_name=${d.name}`
-	},
-	to_date: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if (d.from_date && d.to_date && d.to_date < d.from_date) {
-			frm.fields_dict['files'].grid.grid_rows_by_docname[cdn].get_field('to_date').set_value(null);
-			frappe.throw('To Date should be greater than from date');
-		}
 	}
 })
