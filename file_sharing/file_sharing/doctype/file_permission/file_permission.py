@@ -119,37 +119,40 @@ def validate_files_before_sharing(self):
 			)
 
 def send_email_with_file_details(self):
-	email = self.email_id
-	if is_valid_email(email_id):
-		frappe.msgprint(f"{email_id} is not a valid email address.")
-		return
+    item_details = []
+    for item in self.files:
+        details = f"File: {item.file_url}"
 
-	item_details = []
-	for item in self.files:
-		details = f"File: {item.file_url}"
-		if item.date_based_sharing == 1:
-			valid_from = formatdate(item.from_date)
-			valid_to = formatdate(item.to_date)
-			details += f", valid from {valid_from} to {valid_to}"
-			if item.view_based_sharing == 1:
-				details += f", valid for {item.views_allowed} views"
-			item_details.append(details)
+        # Check if both date-based and view-based sharing are enabled
+        if item.date_based_sharing == 1 and item.view_based_sharing == 1:
+            valid_from = formatdate(item.from_date)
+            valid_to = formatdate(item.to_date)
+            details += f", {item.views_allowed} views valid from {valid_from} to {valid_to}"
+        elif item.date_based_sharing == 1:
+            # Only date-based sharing is enabled
+            valid_from = formatdate(item.from_date)
+            valid_to = formatdate(item.to_date)
+            details += f", valid from {valid_from} to {valid_to}"
+        elif item.view_based_sharing == 1:
+            # Only view-based sharing is enabled
+            details += f", valid for {item.views_allowed} views"
+        else:
+            # Neither condition is true, indicate unlimited availability
+            details += ", available unlimited times"
 
-			message = f"Dear Supplier,<br><br>The following drawings have been shared with you:<br><br>"
-			message += "<br>".join(item_details)
-			message += f"<br><br>To view these shared drawings, please <a href='https://${frappe.utils.get_url()}'>visit the supplier portal</a>.<br><br>Regards,<br>ERP Team"
+        item_details.append(details)
 
-			subject = f"Drawings Shared for {self.file_reference}"
+    message = f"Dear Supplier,<br><br>The following files have been shared with you:<br><br>"
+    message += "<br>".join(item_details)
+    message += f"<br><br>To view these shared files, please <a href='https://${frappe.utils.get_url()}'>visit the supplier portal</a>.<br><br>Regards,<br>ERP Team"
 
-			frappe.sendmail(
-				recipients=[self.email_id],
-				subject=subject,
-				message=message
-			)
+    subject = f"Files Shared for {self.file_reference}"
 
-def is_valid_email(email):
-    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(email_regex, email) is not None
+    frappe.sendmail(
+        recipients=[self.email_id],
+        subject=subject,
+        message=message
+    )
 
 #Schedular
 def auto_expire_drawings_by_date():
