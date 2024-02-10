@@ -1,5 +1,7 @@
 import frappe
 
+no_cache = 1
+
 def get_context(context):
     context.file_url, context.allow_download, context.parent, context.child_status, context.is_private = frappe.db.get_value(
         'File Permission Item',
