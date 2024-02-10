@@ -198,12 +198,11 @@ def get_unique_file_urls_for_document(file_doctype, file_reference):
     if not file_data:
         return None
 
-    # Process the file data to retain only unique URLs, preferring private URLs
     unique_files = {}
     for file in file_data:
         file_name = file['file_url'].split('/')[-1]
         if file_name not in unique_files or file['is_private']:
-            unique_files[file_name] = file['file_url']
+            unique_files[file_name] = file
 
     return list(unique_files.values())
 	
