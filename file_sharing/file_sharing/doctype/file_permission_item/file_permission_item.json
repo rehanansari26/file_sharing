@@ -38,7 +38,6 @@
   },
   {
    "columns": 1,
-   "depends_on": "eval:!parent.__islocal && doc.file_url",
    "fieldname": "child_status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -163,7 +162,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-07 15:00:29.354169",
+ "modified": "2024-02-09 15:23:18.132255",
  "modified_by": "Administrator",
  "module": "File Sharing",
  "name": "File Permission Item",

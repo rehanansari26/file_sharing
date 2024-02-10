@@ -114,7 +114,7 @@ frappe.ui.form.on('File Permission', {
 							child.c_file_reference = frm.doc.file_reference;
 							child.file_url = data.file_url;
 							child.is_private = data.is_private;
-							child.child_status = null;
+							// child.child_status = 'Draft';
 						});
 						frm.refresh_field('files');
 						$('.grid-add-row').hide();
