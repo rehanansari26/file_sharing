@@ -172,11 +172,41 @@ def auto_expire_drawings_by_date():
 #JS
 @frappe.whitelist()
 def get_unique_file_urls_for_document(file_doctype, file_reference):
-	file_data = frappe.db.get_all('File',{'attached_to_doctype': file_doctype, 'attached_to_name': file_reference, 'file_type': ['in', ['PDF', 'GLB']]},['file_url', 'is_private'], group_by='file_url')	
-	if not file_data:
-		return None
-	return file_data
+    allow_public_files = frappe.db.get_single_value('File Settings', 'allow_public_files')
 
+    # Determine the filter based on 'allow_public_files' setting
+    if allow_public_files:
+        is_private_filter = {'is_private': ['in', [0, 1]]}
+    else:
+        is_private_filter = {'is_private': 1}
+
+    # Construct the query filters
+    filters = {
+        **is_private_filter,
+        'attached_to_doctype': file_doctype,
+        'attached_to_name': file_reference,
+        'file_type': ['in', ['PDF', 'GLB']]
+    }
+
+    # Query the database
+    file_data = frappe.db.get_all(
+        'File',
+        filters,
+        ['file_url', 'is_private']
+    )
+
+    if not file_data:
+        return None
+
+    # Process the file data to retain only unique URLs, preferring private URLs
+    unique_files = {}
+    for file in file_data:
+        file_name = file['file_url'].split('/')[-1]
+        if file_name not in unique_files or file['is_private']:
+            unique_files[file_name] = file['file_url']
+
+    return list(unique_files.values())
+	
 #Web Page	
 @frappe.whitelist()
 def log_view_if_not_expired(reference_name):
